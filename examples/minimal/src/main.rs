@@ -1,8 +1,5 @@
 use pixel_renderer::{app::Callbacks, canvas::Canvas};
 
-const WIDTH: u32 = 256;
-const HEIGHT: u32 = 256;
-
 struct Game {}
 
 impl Callbacks for Game {
@@ -16,7 +13,10 @@ impl Callbacks for Game {
         }
         false
     }
+
     fn dimensions(&self) -> (u32, u32) {
+        const WIDTH: u32 = 256;
+        const HEIGHT: u32 = 256;
         (WIDTH, HEIGHT)
     }
 }

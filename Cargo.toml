@@ -17,3 +17,9 @@ bytemuck = { version = "1.13.1", features = ["derive"] }
 version = "0.24"
 default-features = false
 features = ["png", "jpeg"]
+
+[dev-dependencies]
+
+[[example]]
+name = "minimal"
+path = "examples/minimal/src/main.rs"

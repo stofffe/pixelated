@@ -4,7 +4,7 @@ use crate::{canvas::Canvas, render};
 pub trait Callbacks {
     /// Called once per frame before render
     /// Return value determines wether to exit game or not
-    fn update(&mut self, canvas: &mut Canvas) -> bool {
+    fn update(&mut self, _canvas: &mut Canvas) -> bool {
         false
     }
 

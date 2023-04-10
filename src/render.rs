@@ -10,34 +10,6 @@ use crate::{
     canvas::Canvas,
 };
 
-#[repr(C)]
-#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
-struct Vertex {
-    position: [f32; 3],
-    uv: [f32; 2],
-}
-
-impl Vertex {
-    fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
-        wgpu::VertexBufferLayout {
-            array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
-            step_mode: wgpu::VertexStepMode::Vertex,
-            attributes: &[
-                wgpu::VertexAttribute {
-                    offset: 0,
-                    shader_location: 0,
-                    format: wgpu::VertexFormat::Float32x3,
-                },
-                wgpu::VertexAttribute {
-                    offset: std::mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
-                    shader_location: 1,
-                    format: wgpu::VertexFormat::Float32x2,
-                },
-            ],
-        }
-    }
-}
-
 struct RenderContext {
     surface: wgpu::Surface,
     device: wgpu::Device,
@@ -106,6 +78,7 @@ impl RenderContext {
         };
         surface.configure(&device, &config);
 
+        // Initialize texture
         let texture_size = wgpu::Extent3d {
             width,
             height,
@@ -372,56 +345,32 @@ pub async fn run_window<C: Callbacks + 'static>(mut app: App<C>) {
         _ => {}
     });
 }
-// Load texture
-// let diffuse_bytes = include_bytes!("happy-tree.png");
-// let diffuse_image = image::load_from_memory(diffuse_bytes).unwrap();
-// let diffuse_rgba = diffuse_image.to_rgba8();
-// println!("{:?}", diffuse_rgba.len());
-//
-// use image::GenericImageView;
-// let dimensions = diffuse_image.dimensions();
-// println!("dimensions {:?}", dimensions);
 
-// let texture_size = wgpu::Extent3d {
-//     width: dimensions.0,
-//     height: dimensions.1,
-//     depth_or_array_layers: 1,
-// };
+// Vertex representation
+#[repr(C)]
+#[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
+struct Vertex {
+    position: [f32; 3],
+    uv: [f32; 2],
+}
 
-// let [r, g, b, a]: [u8; 4] = [0, 255, 255, 255];
-// let pixel = (r << 6) | (g << 4) | (b << 2) | (a);
-
-// println!("{pixel}");
-//
-// const LEN: usize = 256 * 256 * 4;
-// let mut pixels: [u8; LEN] = [0xFF; LEN];
-
-// let pixels: &[u8; len] = &[0; len];
-// for i in (0..100).step_by(4) {
-//     pixels[i] = r;
-//     pixels[i + 1] = g;
-//     pixels[i + 2] = b;
-//     pixels[i + 3] = a;
-// }
-// let (x, y) = (10, 10);
-// let index = y as usize * width as usize + x as usize;
-// for i in 0..10 {
-//     for j in 0..10 {
-//         pixels[index + j + width as usize * i] = 0;
-//     }
-// }
-// queue.write_texture(
-//     wgpu::ImageCopyTexture {
-//         texture: &diffuse_texture,
-//         mip_level: 0,
-//         origin: wgpu::Origin3d::ZERO,
-//         aspect: wgpu::TextureAspect::All,
-//     },
-//     &diffuse_rgba,
-//     wgpu::ImageDataLayout {
-//         offset: 0,
-//         bytes_per_row: std::num::NonZeroU32::new(4 * dimensions.0),
-//         rows_per_image: std::num::NonZeroU32::new(dimensions.1),
-//     },
-//     texture_size,
-// );
+impl Vertex {
+    fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
+        wgpu::VertexBufferLayout {
+            array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
+            step_mode: wgpu::VertexStepMode::Vertex,
+            attributes: &[
+                wgpu::VertexAttribute {
+                    offset: 0,
+                    shader_location: 0,
+                    format: wgpu::VertexFormat::Float32x3,
+                },
+                wgpu::VertexAttribute {
+                    offset: std::mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
+                    shader_location: 1,
+                    format: wgpu::VertexFormat::Float32x2,
+                },
+            ],
+        }
+    }
+}
