@@ -1,15 +1,15 @@
 pub struct Canvas {
-    pub pixels: Vec<u8>,
-    pub width: u32,
-    pub height: u32,
-    pub clear_color: [u8; 4],
+    pub(crate) pixels: Vec<u8>,
+    pub(crate) width: u32,
+    pub(crate) height: u32,
+    pub(crate) clear_color: [u8; 4],
 }
 
 impl Canvas {
     pub fn new(width: u32, height: u32) -> Self {
         // Pixels
         let capacity = width * height * 4;
-        let mut pixels = Vec::with_capacity(capacity as usize);
+        let mut pixels = Vec::new();
         pixels.resize(capacity as usize, 0);
 
         // Clear color
