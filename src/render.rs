@@ -252,7 +252,8 @@ impl RenderContext {
                 rows_per_image: std::num::NonZeroU32::new(self.canvas.height),
             },
             self.texture_size,
-        );
+       );
+
 
         // Render texture
         let output = self.surface.get_current_texture()?;

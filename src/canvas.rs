@@ -1,3 +1,5 @@
+use image::{ImageBuffer, Rgba, RgbaImage};
+
 pub struct Canvas {
     pub(crate) pixels: Vec<u8>,
     pub(crate) width: u32,
@@ -21,6 +23,22 @@ impl Canvas {
             width,
             height,
         }
+    }
+
+    pub fn get_pixel(&self, x: u32, y: u32) -> [u8; 4] {
+        if x > self.width - 1 || y > self.height - 1 {
+            log::error!(
+                "trying to get pixel outside screen, x: {}, y: {}, width: 0-{} (exclusive), height: 0-{} (exclusive)",
+                x,
+                y,
+                self.width ,
+                self.height 
+            );
+            panic!() // TODO improve info
+        }
+
+        let index = (y * 4 * self.width + x * 4) as usize;
+        [self.pixels[index], self.pixels[index+1], self.pixels[index+2], self.pixels[index+3]]
     }
 
     pub fn write_pixel(&mut self, x: u32, y: u32, color: &[u8; 4]) {
@@ -53,5 +71,16 @@ impl Canvas {
             pixel[2] = self.clear_color[2];
             pixel[3] = self.clear_color[3];
         }
+    }
+
+    // TODO not super fast
+    pub fn export_to_file(&self, path: &str) {
+        let mut img  = RgbaImage::new(self.width, self.height);
+
+        for (x,y,pixel) in img.enumerate_pixels_mut() {
+            *pixel = Rgba(self.get_pixel(x, y));
+        }
+
+        img.save(path).unwrap();
     }
 }
