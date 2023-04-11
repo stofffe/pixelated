@@ -1,4 +1,4 @@
-use image::{ImageBuffer, Rgba, RgbaImage};
+use image::{ImageBuffer, Rgba, RgbaImage, ImageResult};
 
 pub struct Canvas {
     pub(crate) pixels: Vec<u8>,
@@ -74,13 +74,13 @@ impl Canvas {
     }
 
     // TODO not super fast
-    pub fn export_to_file(&self, path: &str) {
+    pub fn export_to_file(&self, path: &str) -> ImageResult<()> {
         let mut img  = RgbaImage::new(self.width, self.height);
 
         for (x,y,pixel) in img.enumerate_pixels_mut() {
             *pixel = Rgba(self.get_pixel(x, y));
         }
 
-        img.save(path).unwrap();
+        img.save(path)
     }
 }
