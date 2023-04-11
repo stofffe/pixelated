@@ -31,15 +31,16 @@ impl Canvas {
         self.pixels[index + 3] = color[3];
     }
 
+    pub fn capacity(&self) -> u32 {
+        self.width * self.height * 4
+    }
+
     pub fn clear_screen(&mut self) {
-        for y in 0..self.height {
-            for x in 0..self.width {
-                let index = (y * self.width + x) as usize;
-                self.pixels[index] = self.clear_color[0];
-                self.pixels[index + 1] = self.clear_color[1];
-                self.pixels[index + 2] = self.clear_color[2];
-                self.pixels[index + 3] = self.clear_color[3];
-            }
+        for pixel in self.pixels.chunks_mut(4) {
+            pixel[0] = self.clear_color[0];
+            pixel[1] = self.clear_color[1];
+            pixel[2] = self.clear_color[2];
+            pixel[3] = self.clear_color[3];
         }
     }
 }

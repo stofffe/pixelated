@@ -1,35 +1,27 @@
+use crate::canvas::Canvas;
 use wgpu::util::DeviceExt;
-use winit::{
-    event::*,
-    event_loop::{ControlFlow, EventLoop},
-    window::{Window, WindowBuilder},
-};
+use winit::window::Window;
 
-use crate::{
-    app::{App, Callbacks},
-    canvas::Canvas,
-};
-
-struct RenderContext {
-    surface: wgpu::Surface,
-    device: wgpu::Device,
-    queue: wgpu::Queue,
-    config: wgpu::SurfaceConfiguration,
-    size: winit::dpi::PhysicalSize<u32>,
-    window: Window,
-    render_pipeline: wgpu::RenderPipeline,
-    vertex_buffer: wgpu::Buffer,
-    index_buffer: wgpu::Buffer,
-    num_indices: u32,
-    diffuse_bind_group: wgpu::BindGroup,
-    canvas: Canvas,
-    texture: wgpu::Texture,
-    texture_size: wgpu::Extent3d,
+pub struct RenderContext {
+    pub(crate) surface: wgpu::Surface,
+    pub(crate) device: wgpu::Device,
+    pub(crate) queue: wgpu::Queue,
+    pub(crate) config: wgpu::SurfaceConfiguration,
+    pub(crate) size: winit::dpi::PhysicalSize<u32>,
+    pub(crate) window: Window,
+    pub(crate) render_pipeline: wgpu::RenderPipeline,
+    pub(crate) vertex_buffer: wgpu::Buffer,
+    pub(crate) index_buffer: wgpu::Buffer,
+    pub(crate) num_indices: u32,
+    pub(crate) diffuse_bind_group: wgpu::BindGroup,
+    pub(crate) canvas: Canvas,
+    pub(crate) texture: wgpu::Texture,
+    pub(crate) texture_size: wgpu::Extent3d,
 }
 
 impl RenderContext {
     // Creating some of the wgpu types requires async code
-    async fn new(window: Window, width: u32, height: u32) -> Self {
+    pub(crate) async fn new(window: Window, width: u32, height: u32) -> Self {
         // Create surface
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
@@ -146,7 +138,7 @@ impl RenderContext {
         // Configure pipeline
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Shader"),
-            source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
+            source: wgpu::ShaderSource::Wgsl(include_str!("../shaders/shader.wgsl").into()),
         });
 
         let render_pipeline_layout =
@@ -235,11 +227,7 @@ impl RenderContext {
         }
     }
 
-    pub fn window(&self) -> &Window {
-        &self.window
-    }
-
-    pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
+    pub(crate) fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
         if new_size.width > 0 && new_size.height > 0 {
             self.size = new_size;
             self.config.width = new_size.width;
@@ -248,7 +236,7 @@ impl RenderContext {
         }
     }
 
-    fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+    pub(crate) fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         // Update texture
         self.queue.write_texture(
             wgpu::ImageCopyTexture {
@@ -308,45 +296,7 @@ impl RenderContext {
     }
 }
 
-pub async fn run_window<C: Callbacks + 'static>(mut app: App<C>) {
-    env_logger::init();
-    let event_loop = EventLoop::new();
-    let window = WindowBuilder::new().build(&event_loop).unwrap();
-
-    let (width, height) = app.callbacks.dimensions();
-    let mut ctx = RenderContext::new(window, width, height).await;
-
-    event_loop.run(move |event, _, control_flow| match event {
-        Event::WindowEvent {
-            ref event,
-            window_id,
-        } if window_id == ctx.window().id() => match event {
-            WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
-            WindowEvent::Resized(physical_size) => {
-                ctx.resize(*physical_size);
-            }
-            WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                ctx.resize(**new_inner_size);
-            }
-            _ => {}
-        },
-        Event::RedrawRequested(window_id) if window_id == ctx.window().id() => match ctx.render() {
-            Ok(_) => {}
-            Err(wgpu::SurfaceError::Lost) => ctx.resize(ctx.size),
-            Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
-            Err(e) => eprintln!("{:?}", e),
-        },
-        Event::MainEventsCleared => {
-            if app.update(&mut ctx.canvas) {
-                *control_flow = ControlFlow::Exit;
-            }
-            ctx.window().request_redraw();
-        }
-        _ => {}
-    });
-}
-
-// Vertex representation
+/// Vertex representation
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 struct Vertex {
