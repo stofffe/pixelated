@@ -14,7 +14,7 @@ pub struct RenderContext {
     pub(crate) index_buffer: wgpu::Buffer,
     pub(crate) num_indices: u32,
     pub(crate) diffuse_bind_group: wgpu::BindGroup,
-    pub(crate) canvas: Canvas,
+    pub canvas: Canvas,
     pub(crate) texture: wgpu::Texture,
     pub(crate) texture_size: wgpu::Extent3d,
 }

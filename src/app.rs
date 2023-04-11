@@ -1,18 +1,13 @@
 use crate::{
-    canvas::Canvas, context::Context, input::InputContext, render::RenderContext,
-    time::TimeContext, window,
+    context::Context, input::InputContext, render::RenderContext, time::TimeContext, window,
 };
 use winit::event_loop::EventLoop;
 
 /// User callbaks
 pub trait Callbacks {
     /// Called once per frame before render
-    ///
-    /// canvas: Canvas to draw pixels to
-    /// dt: time since last frame
-    ///
     /// Return value determines wether to exit game or not
-    fn update(&mut self, _canvas: &mut Canvas, input: &InputContext, _dt: f32) -> bool {
+    fn update(&mut self, _ctx: &mut Context, _dt: f32) -> bool {
         false
     }
 }
@@ -41,10 +36,7 @@ where
         let dt = ctx.time.update_time();
 
         // Update callback
-        if self
-            .callbacks
-            .update(&mut ctx.render.canvas, &ctx.input, dt)
-        {
+        if self.callbacks.update(ctx, dt) {
             return true;
         }
 

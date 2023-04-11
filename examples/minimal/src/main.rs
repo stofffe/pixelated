@@ -1,18 +1,21 @@
 use pixel_renderer::{
     app::{Callbacks, Config},
-    canvas::Canvas,
-    input::{InputContext, KeyCode},
+    context::Context,
+    input::KeyCode,
 };
 
 struct Game {}
 
 impl Callbacks for Game {
-    fn update(&mut self, canvas: &mut Canvas, input: &InputContext, dt: f32) -> bool {
+    fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
+        let canvas = &mut ctx.render.canvas;
+        let keyboard = &ctx.input.keyboard;
+
         let color: [u8; 4] = [0, 255, 255, 255];
 
         canvas.clear_screen();
 
-        if input.keyboard.key_pressed(KeyCode::Space) {
+        if keyboard.key_pressed(KeyCode::Space) {
             for y in (200..1024).step_by(4) {
                 for x in (50..80).step_by(4) {
                     canvas.write_pixel(x, y, &color);
