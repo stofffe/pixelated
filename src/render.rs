@@ -1,4 +1,4 @@
-use crate::canvas::Canvas;
+use crate::{app::Config, canvas::Canvas};
 use wgpu::util::DeviceExt;
 use winit::window::Window;
 
@@ -6,7 +6,7 @@ pub struct RenderContext {
     pub(crate) surface: wgpu::Surface,
     pub(crate) device: wgpu::Device,
     pub(crate) queue: wgpu::Queue,
-    pub(crate) config: wgpu::SurfaceConfiguration,
+    pub(crate) surface_config: wgpu::SurfaceConfiguration,
     pub(crate) size: winit::dpi::PhysicalSize<u32>,
     pub(crate) window: Window,
     pub(crate) render_pipeline: wgpu::RenderPipeline,
@@ -21,7 +21,7 @@ pub struct RenderContext {
 
 impl RenderContext {
     // Creating some of the wgpu types requires async code
-    pub(crate) async fn new(window: Window, width: u32, height: u32) -> Self {
+    pub(crate) async fn new(window: Window, config: &Config) -> Self {
         // Create surface
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
@@ -59,7 +59,7 @@ impl RenderContext {
             .copied()
             .find(|f| f.describe().srgb)
             .unwrap_or(surface_caps.formats[0]);
-        let config = wgpu::SurfaceConfiguration {
+        let surface_config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,
             width: size.width,
@@ -68,12 +68,12 @@ impl RenderContext {
             alpha_mode: surface_caps.alpha_modes[0],
             view_formats: vec![],
         };
-        surface.configure(&device, &config);
+        surface.configure(&device, &surface_config);
 
         // Initialize texture
         let texture_size = wgpu::Extent3d {
-            width,
-            height,
+            width: config.width,
+            height: config.height,
             depth_or_array_layers: 1,
         };
         let diffuse_texture = device.create_texture(&wgpu::TextureDescriptor {
@@ -160,7 +160,7 @@ impl RenderContext {
                 module: &shader,
                 entry_point: "fs_main",
                 targets: &[Some(wgpu::ColorTargetState {
-                    format: config.format,
+                    format: surface_config.format,
                     blend: Some(wgpu::BlendState::REPLACE),
                     write_mask: wgpu::ColorWrites::ALL,
                 })],
@@ -214,7 +214,7 @@ impl RenderContext {
             surface,
             device,
             queue,
-            config,
+            surface_config,
             size,
             render_pipeline,
             vertex_buffer,
@@ -230,9 +230,9 @@ impl RenderContext {
     pub(crate) fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
         if new_size.width > 0 && new_size.height > 0 {
             self.size = new_size;
-            self.config.width = new_size.width;
-            self.config.height = new_size.height;
-            self.surface.configure(&self.device, &self.config);
+            self.surface_config.width = new_size.width;
+            self.surface_config.height = new_size.height;
+            self.surface.configure(&self.device, &self.surface_config);
         }
     }
 

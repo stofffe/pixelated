@@ -24,7 +24,18 @@ impl Canvas {
     }
 
     pub fn write_pixel(&mut self, x: u32, y: u32, color: &[u8; 4]) {
-        let index = (y * self.width + x) as usize;
+        if x > self.width - 1 || y > self.height - 1 {
+            log::error!(
+                "trying to draw outside screen, x: {}, y: {}, width: 0-{} (exclusive), height: 0-{} (exclusive)",
+                x,
+                y,
+                self.width ,
+                self.height 
+            );
+            panic!() // TODO improve info
+        }
+
+        let index = (y * 4 * self.width + x * 4) as usize;
         self.pixels[index] = color[0];
         self.pixels[index + 1] = color[1];
         self.pixels[index + 2] = color[2];

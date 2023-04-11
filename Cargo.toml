@@ -23,3 +23,7 @@ features = ["png", "jpeg"]
 [[example]]
 name = "minimal"
 path = "examples/minimal/src/main.rs"
+
+[[example]]
+name = "bilinear"
+path = "examples/bilinear/src/main.rs"

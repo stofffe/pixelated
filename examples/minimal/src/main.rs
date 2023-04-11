@@ -16,14 +16,14 @@ impl Callbacks for Game {
         canvas.clear_screen();
 
         if keyboard.key_pressed(KeyCode::Space) {
-            for y in (200..1024).step_by(4) {
-                for x in (50..80).step_by(4) {
+            for y in 0..257 {
+                for x in 10..40 {
                     canvas.write_pixel(x, y, &color);
                 }
             }
         } else {
-            for y in (40..100).step_by(4) {
-                for x in (50..80).step_by(4) {
+            for y in 40..100 {
+                for x in 50..80 {
                     canvas.write_pixel(x, y, &color);
                 }
             }
@@ -40,6 +40,8 @@ fn main() {
     let config = Config {
         width: 256,
         height: 256,
+        resizeable: false,
     };
     pixel_renderer::app::run(app, config)
 }
+

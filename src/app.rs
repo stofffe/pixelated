@@ -16,6 +16,7 @@ pub trait Callbacks {
 pub struct Config {
     pub width: u32,
     pub height: u32,
+    pub resizeable: bool,
 }
 
 /// Main App
@@ -54,17 +55,17 @@ where
 {
     env_logger::init();
     let app = App { callbacks, config };
-    let (ctx, event_loop) = pollster::block_on(build_context(app.config.width, app.config.height));
+    let (ctx, event_loop) = pollster::block_on(build_context(&app.config));
     pollster::block_on(window::run_window(event_loop, app, ctx));
 }
 
 // TODO contex builder?
-pub async fn build_context(width: u32, height: u32) -> (Context, EventLoop<()>) {
-    let (window, event_loop) = window::new_window();
+pub async fn build_context(config: &Config) -> (Context, EventLoop<()>) {
+    let (window, event_loop) = window::new_window(config);
 
     let time = TimeContext::default();
     let input = InputContext::default();
-    let render = RenderContext::new(window, width, height).await;
+    let render = RenderContext::new(window, config).await;
     let context = Context {
         render,
         time,
