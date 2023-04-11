@@ -207,7 +207,7 @@ impl RenderContext {
 
         let num_indices = INDICES.len() as u32;
 
-        let canvas = Canvas::new(256, 256);
+        let canvas = Canvas::new(config.width, config.height);
 
         Self {
             window,
