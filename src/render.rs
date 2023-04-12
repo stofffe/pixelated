@@ -1,4 +1,8 @@
+use std::fs::File;
+
 use crate::{app::Config, canvas::Canvas};
+use gif::{Encoder, Frame, Repeat};
+use image::{ImageResult, RgbaImage};
 use wgpu::util::DeviceExt;
 use winit::window::Window;
 
@@ -15,6 +19,8 @@ pub struct RenderContext {
     pub(crate) num_indices: u32,
     pub(crate) diffuse_bind_group: wgpu::BindGroup,
     pub canvas: Canvas,
+    pub screenshot_uploader: ScreenshotUploader,
+    pub gif_uploader: GifUploader,
     pub(crate) texture: wgpu::Texture,
     pub(crate) texture_size: wgpu::Extent3d,
 }
@@ -208,6 +214,8 @@ impl RenderContext {
         let num_indices = INDICES.len() as u32;
 
         let canvas = Canvas::new(config.width, config.height);
+        let screenshot_uploader = ScreenshotUploader::new(config.width, config.height);
+        let gif_uploader = GifUploader::new(config.width, config.height);
 
         Self {
             window,
@@ -221,9 +229,11 @@ impl RenderContext {
             index_buffer,
             num_indices,
             diffuse_bind_group,
-            canvas,
             texture: diffuse_texture,
             texture_size,
+            canvas,
+            screenshot_uploader,
+            gif_uploader,
         }
     }
 
@@ -252,8 +262,7 @@ impl RenderContext {
                 rows_per_image: std::num::NonZeroU32::new(self.canvas.height),
             },
             self.texture_size,
-       );
-
+        );
 
         // Render texture
         let output = self.surface.get_current_texture()?;
@@ -323,5 +332,76 @@ impl Vertex {
                 },
             ],
         }
+    }
+}
+
+// Upload screenshots and gifs
+
+/// Can take screenshots of a canvas
+pub struct ScreenshotUploader {
+    width: u32,
+    height: u32,
+}
+
+impl ScreenshotUploader {
+    /// Create ScreenshotUploader with specific width and height
+    pub fn new(width: u32, height: u32) -> Self {
+        Self { width, height }
+    }
+
+    /// Export current state of canvas to a image at the specified path
+    pub fn export_to_file(&self, canvas: &Canvas, path: &str) -> ImageResult<()> {
+        let mut img = RgbaImage::new(self.width, self.height);
+
+        img.copy_from_slice(canvas.get_pixel_buffer().as_slice());
+
+        img.save(path)
+    }
+}
+
+/// Can record gif of canvas frames
+#[derive(Default)]
+pub struct GifUploader {
+    frames: Vec<Vec<u8>>,
+    width: u32,
+    height: u32,
+}
+
+impl GifUploader {
+    /// Create GifUploader with specific width and height
+    /// frame_skip specifies how many frames to step by when exporting to gif
+    pub fn new(width: u32, height: u32) -> Self {
+        Self {
+            width,
+            height,
+            frames: Vec::default(),
+        }
+    }
+
+    /// Record the current canvas into a frame
+    pub fn record(&mut self, canvas: &Canvas) {
+        self.frames.push(canvas.get_pixel_buffer());
+    }
+
+    /// Export the current frames to a file at specified path
+    pub fn export_to_gif(&mut self, path: &str) {
+        let file = File::create(path).unwrap();
+        let mut encoder = Encoder::new(&file, self.width as u16, self.height as u16, &[]).unwrap();
+
+        encoder.set_repeat(Repeat::Infinite).unwrap();
+
+        for frame in self.frames.iter_mut() {
+            let mut rgba = RgbaImage::new(self.width, self.height);
+            rgba.copy_from_slice(frame);
+
+            let mut gif_frame = Frame::from_rgba(self.width as u16, self.height as u16, frame);
+            gif_frame.delay = 1;
+            encoder.write_frame(&gif_frame).unwrap();
+        }
+    }
+
+    /// Clear current frames
+    pub fn clear(&mut self) {
+        self.frames.clear();
     }
 }

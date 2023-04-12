@@ -1,5 +1,4 @@
-use image::{ImageBuffer, Rgba, RgbaImage, ImageResult};
-
+/// Represent the screen of pixels
 pub struct Canvas {
     pub(crate) pixels: Vec<u8>,
     pub(crate) width: u32,
@@ -8,6 +7,7 @@ pub struct Canvas {
 }
 
 impl Canvas {
+    /// Create new canvas with specified width and height
     pub fn new(width: u32, height: u32) -> Self {
         // Pixels
         let capacity = width * height * 4;
@@ -25,6 +25,13 @@ impl Canvas {
         }
     }
 
+    /// Clone pixel buffer
+    pub fn get_pixel_buffer(&self) -> Vec<u8> {
+        self.pixels.clone()
+    }
+
+    /// Get pixel data for a coordianate
+    /// Panics if trying to access outside canvas
     pub fn get_pixel(&self, x: u32, y: u32) -> [u8; 4] {
         if x > self.width - 1 || y > self.height - 1 {
             log::error!(
@@ -41,6 +48,8 @@ impl Canvas {
         [self.pixels[index], self.pixels[index+1], self.pixels[index+2], self.pixels[index+3]]
     }
 
+    /// Write pixel data to a coordinate
+    /// Panics if trying to write outside canvas
     pub fn write_pixel(&mut self, x: u32, y: u32, color: &[u8; 4]) {
         if x > self.width - 1 || y > self.height - 1 {
             log::error!(
@@ -60,10 +69,7 @@ impl Canvas {
         self.pixels[index + 3] = color[3];
     }
 
-    pub fn capacity(&self) -> u32 {
-        self.width * self.height * 4
-    }
-
+    /// Clears all pixels in canvas to clear color
     pub fn clear_screen(&mut self) {
         for pixel in self.pixels.chunks_mut(4) {
             pixel[0] = self.clear_color[0];
@@ -73,14 +79,24 @@ impl Canvas {
         }
     }
 
-    // TODO not super fast
-    pub fn export_to_file(&self, path: &str) -> ImageResult<()> {
-        let mut img  = RgbaImage::new(self.width, self.height);
+    /// Get canvas capacity
+    pub fn capacity(&self) -> u32 {
+        self.width * self.height * 4
+    }
 
-        for (x,y,pixel) in img.enumerate_pixels_mut() {
-            *pixel = Rgba(self.get_pixel(x, y));
-        }
-
-        img.save(path)
+    /// Set canvas clear color
+    pub fn set_clear_color(&mut self, color: [u8; 4]) {
+        self.clear_color = color;
     }
 }
+
+
+// TODO not super fast
+// Export current canvas to the specified path
+// pub fn export_to_file(&self, path: &str) -> ImageResult<()> {
+//     let mut img  = RgbaImage::new(self.width, self.height);
+//
+//     img.copy_from_slice(&self.pixels);
+//
+//     img.save(path)
+// }
