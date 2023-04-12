@@ -23,12 +23,12 @@ impl Callbacks for Game {
         }
 
         if keyboard.key_just_pressed(KeyCode::S) {
-            let path = "outputs/minimal.png";
+            let path = "examples/outputs/minimal.png";
             ctx.render
                 .screenshot_uploader
                 .export_to_file(canvas, path)
                 .unwrap();
-            println!("saved screenshot to examples/{}", path);
+            println!("saved screenshot to {}", path);
         }
 
         false

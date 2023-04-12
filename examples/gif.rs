@@ -42,19 +42,19 @@ impl Callbacks for Game {
             println!("recording frame");
         }
         if keyboard.key_just_pressed(KeyCode::G) {
-            let path = "outputs/gif.gif";
+            let path = "examples/outputs/gif.gif";
             println!("creating gif");
             ctx.render.gif_uploader.export_to_gif(path);
             ctx.render.gif_uploader.clear();
-            println!("saved gif to examples/{}", path);
+            println!("saved gif to {}", path);
         }
         if keyboard.key_just_pressed(KeyCode::S) {
-            let path = "outputs/gif.png";
+            let path = "examples/outputs/gif.png";
             ctx.render
                 .screenshot_uploader
                 .export_to_file(canvas, path)
                 .unwrap();
-            println!("saved screenshot to examples/{}", path);
+            println!("saved screenshot to {}", path);
         }
 
         false
