@@ -238,6 +238,7 @@ impl RenderContext {
     }
 
     pub(crate) fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
+        // let a : wgpu::Color
         if new_size.width > 0 && new_size.height > 0 {
             self.size = new_size;
             self.surface_config.width = new_size.width;
@@ -405,3 +406,51 @@ impl GifUploader {
         self.frames.clear();
     }
 }
+
+// #[derive(Clone, Copy, Debug, Default, PartialEq)]
+// pub struct Color {
+//     pub r: f32,
+//     pub g: f32,
+//     pub b: f32,
+//     pub a: f32,
+// }
+//
+// #[allow(missing_docs)]
+// impl Color {
+//     pub const TRANSPARENT: Self = Self {
+//         r: 0.0,
+//         g: 0.0,
+//         b: 0.0,
+//         a: 0.0,
+//     };
+//     pub const BLACK: Self = Self {
+//         r: 0.0,
+//         g: 0.0,
+//         b: 0.0,
+//         a: 1.0,
+//     };
+//     pub const WHITE: Self = Self {
+//         r: 1.0,
+//         g: 1.0,
+//         b: 1.0,
+//         a: 1.0,
+//     };
+//     pub const RED: Self = Self {
+//         r: 1.0,
+//         g: 0.0,
+//         b: 0.0,
+//         a: 1.0,
+//     };
+//     pub const GREEN: Self = Self {
+//         r: 0.0,
+//         g: 1.0,
+//         b: 0.0,
+//         a: 1.0,
+//     };
+//     pub const BLUE: Self = Self {
+//         r: 0.0,
+//         g: 0.0,
+//         b: 1.0,
+//         a: 1.0,
+//     };
+// }

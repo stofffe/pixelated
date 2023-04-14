@@ -9,7 +9,9 @@ use crate::{
     context::Context,
 };
 
-pub fn new_window(config: &Config) -> (winit::window::Window, winit::event_loop::EventLoop<()>) {
+pub(crate) fn new_window(
+    config: &Config,
+) -> (winit::window::Window, winit::event_loop::EventLoop<()>) {
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
         .with_inner_size(winit::dpi::LogicalSize::new(config.width, config.height))
@@ -20,7 +22,7 @@ pub fn new_window(config: &Config) -> (winit::window::Window, winit::event_loop:
     (window, event_loop)
 }
 
-pub async fn run_window<C: Callbacks + 'static>(
+pub(crate) async fn run_window<C: Callbacks + 'static>(
     event_loop: EventLoop<()>,
     mut app: App<C>,
     mut ctx: Context,

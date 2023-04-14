@@ -84,11 +84,26 @@ impl Canvas {
         self.width * self.height * 4
     }
 
+    /// Get canvas width
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    /// Get canvas height
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+
     /// Set canvas clear color
     pub fn set_clear_color(&mut self, color: [u8; 4]) {
         self.clear_color = color;
     }
 }
+
+// TODO implement iterator?
+// for (x,y,pixel) in canvas.iter() {
+//
+// }
 
 
 // TODO not super fast
