@@ -56,6 +56,10 @@ impl Callbacks for Game {
                 .unwrap();
             println!("saved screenshot to {}", path);
         }
+        if keyboard.key_just_pressed(KeyCode::C) {
+            ctx.render.gif_uploader.clear();
+            println!("cleared frames");
+        }
 
         false
     }
@@ -71,5 +75,9 @@ fn main() {
         height: HEIGHT,
         resizeable: false,
     };
+    println!("S: to screenshot");
+    println!("R: to record frames");
+    println!("G: to create gif from frames");
+    println!("C: to clear frames");
     pixel_renderer::app::run(app, config)
 }

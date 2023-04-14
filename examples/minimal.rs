@@ -42,5 +42,6 @@ fn main() {
         height: HEIGHT,
         resizeable: false,
     };
+    println!("S: to screenshot");
     pixel_renderer::app::run(app, config)
 }
