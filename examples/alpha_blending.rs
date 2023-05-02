@@ -14,16 +14,32 @@ impl Callbacks for Game {
         let canvas = &mut ctx.render.canvas;
         let keyboard = &ctx.input.keyboard;
 
+        canvas.set_clear_color(&[255, 255, 255]);
         canvas.clear_screen();
 
-        for y in 75..175 {
-            for x in 75..175 {
-                canvas.write_pixel(x, y, &[0, 255, 255]);
+        // Write
+        for y in 25..125 {
+            for x in 125..225 {
+                canvas.write_pixel_blend(x, y, &[255, 0, 0, 255 / 2]);
+            }
+        }
+
+        // Write opaque green pixel
+        for y in 50..150 {
+            for x in 50..150 {
+                canvas.write_pixel_blend(x, y, &[0, 255, 0, 255 / 2]);
+            }
+        }
+
+        // Write aplha blue pixel
+        for y in 100..200 {
+            for x in 100..200 {
+                canvas.write_pixel_blend(x, y, &[0, 0, 255, 255 / 2]);
             }
         }
 
         if keyboard.key_just_pressed(KeyCode::S) {
-            let path = "examples/outputs/minimal.png";
+            let path = "examples/outputs/alpha_blending.png";
             ctx.render
                 .screenshot_uploader
                 .export_to_file(canvas, path)

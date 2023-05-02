@@ -42,7 +42,20 @@ impl Canvas {
 
     /// Get pixel data for a coordianate
     /// Panics if trying to access outside canvas
-    pub fn get_pixel(&self, x: u32, y: u32) -> [u8; 4] {
+    pub fn get_pixel(&self, x: u32, y: u32) -> [u8; 3] {
+        assert_pixel(x, y, self.width, self.height);
+
+        let index = (y * 4 * self.width + x * 4) as usize;
+        [
+            self.pixels[index],
+            self.pixels[index + 1],
+            self.pixels[index + 2],
+        ]
+    }
+
+    /// Get pixel data for a coordianate
+    /// Panics if trying to access outside canvas
+    pub fn get_pixel_alpha(&self, x: u32, y: u32) -> [u8; 4] {
         assert_pixel(x, y, self.width, self.height);
 
         let index = (y * 4 * self.width + x * 4) as usize;
@@ -55,15 +68,52 @@ impl Canvas {
     }
 
     /// Write pixel data to a coordinate (r,g,b,a)
-    /// Panics if trying to write outside canvas
-    pub fn write_pixel(&mut self, x: u32, y: u32, color: &[u8; 4]) {
+    /// Overwrites previous pixel
+    pub fn write_pixel(&mut self, x: u32, y: u32, color: &[u8; 3]) {
         assert_pixel(x, y, self.width, self.height);
 
         let index = (y * 4 * self.width + x * 4) as usize;
         self.pixels[index] = color[0];
         self.pixels[index + 1] = color[1];
         self.pixels[index + 2] = color[2];
-        self.pixels[index + 3] = color[3];
+        self.pixels[index + 3] = 255;
+    }
+
+    /// Write pixel data to a coordinate (r,g,b,a)
+    /// Non premultiplied alpha blending
+    pub fn write_pixel_blend(&mut self, x: u32, y: u32, color: &[u8; 4]) {
+        assert_pixel(x, y, self.width, self.height);
+
+        // Alpha blending where a is over b
+        // https://en.wikipedia.org/wiki/Alpha_compositing
+        let prev_color = self.get_pixel_alpha(x, y);
+        let a = &[
+            color[0] as f32 / 255.0,
+            color[1] as f32 / 255.0,
+            color[2] as f32 / 255.0,
+            color[3] as f32 / 255.0,
+        ];
+        let b = &[
+            prev_color[0] as f32 / 255.0,
+            prev_color[1] as f32 / 255.0,
+            prev_color[2] as f32 / 255.0,
+            prev_color[3] as f32 / 255.0,
+        ];
+
+        let alpha_a = a[3];
+        let alpha_b = b[3];
+        let alpha_over = alpha_a + alpha_b * (1.0 - alpha_a);
+
+        let result_r = (a[0] * alpha_a + b[0] * alpha_b * (1.0 - alpha_a)) / alpha_over;
+        let result_g = (a[1] * alpha_a + b[1] * alpha_b * (1.0 - alpha_a)) / alpha_over;
+        let result_b = (a[2] * alpha_a + b[2] * alpha_b * (1.0 - alpha_a)) / alpha_over;
+        let result_a = alpha_over;
+
+        let index = (y * 4 * self.width + x * 4) as usize;
+        self.pixels[index] = (result_r * 255.0) as u8;
+        self.pixels[index + 1] = (result_g * 255.0) as u8;
+        self.pixels[index + 2] = (result_b * 255.0) as u8;
+        self.pixels[index + 3] = (result_a * 255.0) as u8;
     }
 
     /// Write pixel data to a coordinate (r,g,b,a)
@@ -91,22 +141,22 @@ impl Canvas {
     }
 
     /// Set canvas clear color (r,g,b,a)
-    pub fn set_clear_color(&mut self, color: &[u8; 4]) {
+    pub fn set_clear_color(&mut self, color: &[u8; 3]) {
         self.clear_color[0] = color[0];
         self.clear_color[1] = color[1];
         self.clear_color[2] = color[2];
-        self.clear_color[3] = color[3];
+        self.clear_color[3] = 255;
     }
 
     /// Set canvas clear color (r,g,b)
     /// Values must lie in range [0,1]
-    pub fn set_clear_color_f32(&mut self, color: &[f32; 4]) {
-        assert_rgba(color);
+    pub fn set_clear_color_f32(&mut self, color: &[f32; 3]) {
+        assert_rgb(color);
 
         self.clear_color[0] = (color[0] * 255.0) as u8;
         self.clear_color[1] = (color[1] * 255.0) as u8;
         self.clear_color[2] = (color[2] * 255.0) as u8;
-        self.clear_color[3] = (color[3] * 255.0) as u8;
+        self.clear_color[3] = 255;
     }
 
     /// Get canvas capacity
@@ -127,7 +177,7 @@ impl Canvas {
 
 /// Asserts a pixel is inside the screen
 fn assert_pixel(x: u32, y: u32, width: u32, height: u32) {
-    assert!(
+    debug_assert!(
         x < width && y < height,
         "pixel ({}, {}) not in range [{}, {})",
         x,
@@ -138,23 +188,28 @@ fn assert_pixel(x: u32, y: u32, width: u32, height: u32) {
 }
 
 /// Asserts color components are in range [0,1]
-fn assert_rgba(color: &[f32; 4]) {
-    assert!(
+fn assert_rgb(color: &[f32; 3]) {
+    debug_assert!(
         (0.0..=1.0).contains(&color[0]),
         "r ({}) not in range [0,1]",
         color[0]
     );
-    assert!(
+    debug_assert!(
         (0.0..=1.0).contains(&color[1]),
         "g ({}) not in range [0,1]",
         color[1]
     );
-    assert!(
+    debug_assert!(
         (0.0..=1.0).contains(&color[2]),
         "b ({}) not in range [0,1]",
         color[2]
     );
-    assert!(
+}
+
+/// Asserts color components are in range [0,1]
+fn assert_rgba(color: &[f32; 4]) {
+    assert_rgb(&[color[0], color[1], color[2]]);
+    debug_assert!(
         (0.0..=1.0).contains(&color[3]),
         "a ({}) not in range [0,1]",
         color[3]
@@ -177,7 +232,7 @@ mod tests {
     #[should_panic]
     fn test_write_outside_canvas_panics() {
         let mut canvas = Canvas::new(256, 256);
-        canvas.write_pixel(256, 10, &[255, 255, 255, 255]);
+        canvas.write_pixel(256, 10, &[255, 255, 255]);
     }
 
     #[test]
@@ -189,7 +244,7 @@ mod tests {
 
     #[test]
     fn test_write_then_get_pixel() {
-        let color = [255, 0, 255, 255];
+        let color = [255, 0, 255];
         let mut canvas = Canvas::new(256, 256);
         canvas.write_pixel(11, 10, &color);
 
@@ -201,11 +256,11 @@ mod tests {
     #[test]
     fn test_resize() {
         let mut canvas = Canvas::new(256, 256);
-        canvas.write_pixel(255, 200, &[255, 255, 255, 255]);
+        canvas.write_pixel(255, 200, &[255, 255, 255]);
         canvas.get_pixel(255, 200);
 
         canvas.resize(512, 512);
-        canvas.write_pixel(500, 230, &[255, 255, 255, 255]);
+        canvas.write_pixel(500, 230, &[255, 255, 255]);
         canvas.get_pixel(500, 230);
     }
 }
