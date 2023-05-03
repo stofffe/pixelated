@@ -38,30 +38,35 @@ impl Callbacks for Game {
         }
 
         if keyboard.key_pressed(KeyCode::R) {
-            ctx.render.gif_uploader.record(canvas);
+            canvas.record_gif_frame();
             println!("recording frame");
         }
         if keyboard.key_just_pressed(KeyCode::G) {
             let path = "examples/outputs/gif.gif";
             println!("creating gif");
-            ctx.render.gif_uploader.export_to_gif(path);
-            ctx.render.gif_uploader.clear();
+            canvas.export_gif(path);
+            canvas.clear_gif_frames();
             println!("saved gif to {}", path);
         }
         if keyboard.key_just_pressed(KeyCode::S) {
             let path = "examples/outputs/gif.png";
-            ctx.render
-                .screenshot_uploader
-                .export_to_file(canvas, path)
-                .unwrap();
+            canvas.export_screenshot(path).unwrap();
             println!("saved screenshot to {}", path);
         }
         if keyboard.key_just_pressed(KeyCode::C) {
-            ctx.render.gif_uploader.clear();
+            canvas.clear_gif_frames();
             println!("cleared frames");
         }
 
         false
+    }
+
+    fn config(&self) -> Config {
+        Config {
+            canvas_width: WIDTH,
+            canvas_height: HEIGHT,
+            ..Default::default()
+        }
     }
 }
 
@@ -70,14 +75,9 @@ fn main() {
         box_x: 10.0,
         box_y: 128.0 - 5.0,
     };
-    let config = Config {
-        width: WIDTH,
-        height: HEIGHT,
-        resizeable: false,
-    };
     println!("S: to screenshot");
     println!("R: to record frames");
     println!("G: to create gif from frames");
     println!("C: to clear frames");
-    pixel_renderer::app::run(app, config)
+    pixel_renderer::app::run(app)
 }

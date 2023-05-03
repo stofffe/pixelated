@@ -24,24 +24,24 @@ impl Callbacks for Game {
 
         if keyboard.key_just_pressed(KeyCode::S) {
             let path = "examples/outputs/minimal.png";
-            ctx.render
-                .screenshot_uploader
-                .export_to_file(canvas, path)
-                .unwrap();
+            canvas.export_screenshot(path).unwrap();
             println!("saved screenshot to {}", path);
         }
 
         false
     }
+
+    fn config(&self) -> Config {
+        Config {
+            canvas_width: WIDTH,
+            canvas_height: HEIGHT,
+            ..Default::default()
+        }
+    }
 }
 
 fn main() {
     let app = Game {};
-    let config = Config {
-        width: WIDTH,
-        height: HEIGHT,
-        resizeable: false,
-    };
     println!("S: to screenshot");
-    pixel_renderer::app::run(app, config)
+    pixel_renderer::app::run(app)
 }

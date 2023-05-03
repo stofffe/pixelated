@@ -1,3 +1,8 @@
+use std::fs::File;
+
+use gif::{Encoder, Frame, Repeat};
+use image::{ImageResult, RgbaImage};
+
 const DEFAULT_CLEAR_COLOR: [u8; 4] = [0, 0, 0, 255];
 
 /// Represent the screen of pixels
@@ -5,6 +10,8 @@ pub struct Canvas {
     pub(crate) pixels: Vec<u8>,
     pub(crate) width: u32,
     pub(crate) height: u32,
+    screenshot_uploader: ScreenshotUploader,
+    gif_uploader: GifUploader,
     clear_color: [u8; 4],
 }
 
@@ -15,22 +22,33 @@ impl Canvas {
         let mut pixels = Vec::new();
         pixels.resize(capacity as usize, 0);
 
+        let screenshot_uploader = ScreenshotUploader::new(width, height);
+        let gif_uploader = GifUploader::new(width, height);
+
+        let clear_color = DEFAULT_CLEAR_COLOR;
+
         Self {
             pixels,
             width,
             height,
-            clear_color: DEFAULT_CLEAR_COLOR,
+            screenshot_uploader,
+            gif_uploader,
+            clear_color,
         }
     }
 
     /// Resizes the canvas
     /// Clears screen to ```clear_color```
+    // TODO resize screenshot uploader
     pub fn resize(&mut self, width: u32, height: u32) {
         let capacity = width * height * 4;
 
         self.pixels.resize(capacity as usize, 0);
         self.width = width;
         self.height = height;
+
+        self.screenshot_uploader.resize(width, height);
+        self.gif_uploader.resize(width, height);
 
         self.clear_screen();
     }
@@ -80,6 +98,22 @@ impl Canvas {
     }
 
     /// Write pixel data to a coordinate (r,g,b,a)
+    /// Panics if trying to write outside canvas
+    /// RGBA must be in range [0,1]
+    pub fn write_pixel_f32(&mut self, x: u32, y: u32, color: &[f32; 3]) {
+        assert_pixel(x, y, self.width, self.height);
+        assert_rgb(color);
+
+        let color = [
+            (color[0] * 255.0) as u8,
+            (color[1] * 255.0) as u8,
+            (color[2] * 255.0) as u8,
+        ];
+
+        self.write_pixel(x, y, &color);
+    }
+
+    /// Write pixel data to a coordinate (r,g,b,a)
     /// Non premultiplied alpha blending
     pub fn write_pixel_blend(&mut self, x: u32, y: u32, color: &[u8; 4]) {
         assert_pixel(x, y, self.width, self.height);
@@ -117,27 +151,20 @@ impl Canvas {
     }
 
     /// Write pixel data to a coordinate (r,g,b,a)
-    /// Panics if trying to write outside canvas
+    /// Non premultiplied alpha blending
     /// RGBA must be in range [0,1]
-    pub fn write_pixel_f32(&mut self, x: u32, y: u32, color: &[f32; 4]) {
+    pub fn write_pixel_blend_f32(&mut self, x: u32, y: u32, color: &[f32; 4]) {
         assert_pixel(x, y, self.width, self.height);
         assert_rgba(color);
 
-        let index = (y * 4 * self.width + x * 4) as usize;
-        self.pixels[index] = (color[0] * 255.0) as u8;
-        self.pixels[index + 1] = (color[1] * 255.0) as u8;
-        self.pixels[index + 2] = (color[2] * 255.0) as u8;
-        self.pixels[index + 3] = (color[3] * 255.0) as u8;
-    }
+        let color = [
+            (color[0] * 255.0) as u8,
+            (color[1] * 255.0) as u8,
+            (color[2] * 255.0) as u8,
+            (color[3] * 255.0) as u8,
+        ];
 
-    /// Clears all pixels in canvas to clear color
-    pub fn clear_screen(&mut self) {
-        for pixel in self.pixels.chunks_mut(4) {
-            pixel[0] = self.clear_color[0];
-            pixel[1] = self.clear_color[1];
-            pixel[2] = self.clear_color[2];
-            pixel[3] = self.clear_color[3];
-        }
+        self.write_pixel_blend(x, y, &color);
     }
 
     /// Set canvas clear color (r,g,b,a)
@@ -153,10 +180,23 @@ impl Canvas {
     pub fn set_clear_color_f32(&mut self, color: &[f32; 3]) {
         assert_rgb(color);
 
-        self.clear_color[0] = (color[0] * 255.0) as u8;
-        self.clear_color[1] = (color[1] * 255.0) as u8;
-        self.clear_color[2] = (color[2] * 255.0) as u8;
-        self.clear_color[3] = 255;
+        let color = [
+            (color[0] * 255.0) as u8,
+            (color[1] * 255.0) as u8,
+            (color[2] * 255.0) as u8,
+        ];
+
+        self.set_clear_color(&color);
+    }
+
+    /// Clears all pixels in canvas to clear color
+    pub fn clear_screen(&mut self) {
+        for pixel in self.pixels.chunks_mut(4) {
+            pixel[0] = self.clear_color[0];
+            pixel[1] = self.clear_color[1];
+            pixel[2] = self.clear_color[2];
+            pixel[3] = self.clear_color[3];
+        }
     }
 
     /// Get canvas capacity
@@ -216,6 +256,106 @@ fn assert_rgba(color: &[f32; 4]) {
     );
 }
 
+// Media
+impl Canvas {
+    pub fn export_screenshot(&self, path: &str) -> ImageResult<()> {
+        self.screenshot_uploader.export_to_file(&self.pixels, path)
+    }
+
+    pub fn record_gif_frame(&mut self) {
+        self.gif_uploader.record(self.pixels.clone());
+    }
+
+    pub fn export_gif(&mut self, path: &str) {
+        self.gif_uploader.export_to_gif(path);
+    }
+
+    pub fn clear_gif_frames(&mut self) {
+        self.gif_uploader.clear();
+    }
+}
+
+// Upload screenshots and gifs
+
+/// Can take screenshots of a canvas
+struct ScreenshotUploader {
+    width: u32,
+    height: u32,
+}
+
+impl ScreenshotUploader {
+    /// Create ScreenshotUploader with specific width and height
+    fn new(width: u32, height: u32) -> Self {
+        Self { width, height }
+    }
+
+    fn resize(&mut self, width: u32, height: u32) {
+        self.width = width;
+        self.height = height;
+    }
+
+    /// Export current state of canvas to a image at the specified path
+    fn export_to_file(&self, pixels: &[u8], path: &str) -> ImageResult<()> {
+        let mut img = RgbaImage::new(self.width, self.height);
+
+        img.copy_from_slice(pixels);
+
+        img.save(path)
+    }
+}
+
+/// Can record gif of canvas frames
+#[derive(Default)]
+struct GifUploader {
+    frames: Vec<Vec<u8>>,
+    width: u32,
+    height: u32,
+}
+
+impl GifUploader {
+    /// Create GifUploader with specific width and height
+    /// frame_skip specifies how many frames to step by when exporting to gif
+    fn new(width: u32, height: u32) -> Self {
+        Self {
+            width,
+            height,
+            frames: Vec::default(),
+        }
+    }
+
+    fn resize(&mut self, width: u32, height: u32) {
+        self.width = width;
+        self.height = height;
+    }
+
+    /// Record the current canvas into a frame
+    fn record(&mut self, pixels: Vec<u8>) {
+        self.frames.push(pixels);
+    }
+
+    /// Export the current frames to a file at specified path
+    fn export_to_gif(&mut self, path: &str) {
+        let file = File::create(path).unwrap();
+        let mut encoder = Encoder::new(&file, self.width as u16, self.height as u16, &[]).unwrap();
+
+        encoder.set_repeat(Repeat::Infinite).unwrap();
+
+        for frame in self.frames.iter_mut() {
+            let mut rgba = RgbaImage::new(self.width, self.height);
+            rgba.copy_from_slice(frame);
+
+            let mut gif_frame = Frame::from_rgba(self.width as u16, self.height as u16, frame);
+            gif_frame.delay = 1;
+            encoder.write_frame(&gif_frame).unwrap();
+        }
+    }
+
+    /// Clear current frames
+    fn clear(&mut self) {
+        self.frames.clear();
+    }
+}
+
 // Tests
 #[cfg(test)]
 mod tests {
@@ -239,7 +379,7 @@ mod tests {
     #[should_panic]
     fn test_invalid_rgba() {
         let mut canvas = Canvas::new(256, 256);
-        canvas.write_pixel_f32(256, 10, &[1.0, 1.2, 0.0, 1.0]);
+        canvas.write_pixel_f32(256, 10, &[1.0, 1.2, 0.0]);
     }
 
     #[test]

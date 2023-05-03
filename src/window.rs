@@ -14,7 +14,10 @@ pub(crate) fn new_window(
 ) -> (winit::window::Window, winit::event_loop::EventLoop<()>) {
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
-        .with_inner_size(winit::dpi::LogicalSize::new(config.width, config.height))
+        .with_inner_size(winit::dpi::LogicalSize::new(
+            config.canvas_width,
+            config.canvas_height,
+        ))
         .with_resizable(config.resizeable)
         .build(&event_loop)
         .unwrap();
