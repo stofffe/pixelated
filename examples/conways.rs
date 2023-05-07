@@ -18,19 +18,14 @@ struct Conways {
 impl Conways {
     fn new(width: u32, height: u32) -> Self {
         let len = width * height;
-        let mut cells_1 = vec![false; len as usize];
-        let cells = vec![(1, 0), (2, 1), (0, 2), (1, 2), (2, 2)];
-        for (x, y) in cells.iter() {
-            let index = (x + y * width) as usize;
-            cells_1[index] = true;
-        }
-        let cells_2 = cells_1.clone();
+        let cells = vec![false; len as usize];
+        let buffer_cells = cells.clone();
 
         Self {
             width,
             height,
-            cells: cells_1,
-            buffer_cells: cells_2,
+            cells,
+            buffer_cells,
         }
     }
 
