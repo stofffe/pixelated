@@ -12,6 +12,7 @@ pub trait Callbacks {
 
     /// Called once per frame before render
     /// Return value determines wether to exit game or not
+    /// dt: Time since last frame in seconds
     fn update(&mut self, _ctx: &mut Context, _dt: f32) -> bool {
         false
     }
@@ -24,6 +25,7 @@ pub struct Config {
     pub window_width: u32,
     pub window_height: u32,
     pub resizeable: bool,
+    pub fullscreen: bool,
 }
 
 impl Default for Config {
@@ -31,9 +33,10 @@ impl Default for Config {
         Self {
             canvas_width: 512,
             canvas_height: 512,
-            window_width: 512,
             window_height: 512,
+            window_width: 512,
             resizeable: false,
+            fullscreen: false,
         }
     }
 }
@@ -60,6 +63,7 @@ where
         }
 
         ctx.input.keyboard.save_keys();
+        ctx.input.mouse.save_buttons();
 
         false
     }

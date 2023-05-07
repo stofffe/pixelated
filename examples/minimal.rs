@@ -35,6 +35,7 @@ impl Callbacks for Game {
         Config {
             canvas_width: WIDTH,
             canvas_height: HEIGHT,
+            resizeable: true,
             ..Default::default()
         }
     }

@@ -1,7 +1,8 @@
 use winit::{
+    dpi::PhysicalSize,
     event::{ElementState, Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    window::WindowBuilder,
+    window::{Fullscreen, WindowBuilder},
 };
 
 use crate::{
@@ -13,12 +14,14 @@ pub(crate) fn new_window(
     config: &Config,
 ) -> (winit::window::Window, winit::event_loop::EventLoop<()>) {
     let event_loop = EventLoop::new();
+
     let window = WindowBuilder::new()
-        .with_inner_size(winit::dpi::LogicalSize::new(
-            config.canvas_width,
-            config.canvas_height,
-        ))
         .with_resizable(config.resizeable)
+        .with_inner_size(PhysicalSize::new(config.window_width, config.window_height))
+        .with_fullscreen(match config.fullscreen {
+            true => Some(Fullscreen::Borderless(None)),
+            false => None,
+        })
         .build(&event_loop)
         .unwrap();
 
@@ -41,6 +44,18 @@ pub(crate) async fn run_window<C: Callbacks + 'static>(
             }
             WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
                 ctx.render.resize(**new_inner_size);
+            }
+            WindowEvent::CursorMoved { position, .. } => {
+                ctx.input
+                    .mouse
+                    .set_pos((position.x, position.y), &ctx.render);
+            }
+            WindowEvent::MouseInput { state, button, .. } => match state {
+                ElementState::Pressed => ctx.input.mouse.set_buttons(*button),
+                ElementState::Released => ctx.input.mouse.release_button(*button),
+            },
+            WindowEvent::CursorLeft { .. } => {
+                ctx.input.mouse.set_off_screen();
             }
             WindowEvent::KeyboardInput { input, .. } => {
                 if let Some(keycode) = input.virtual_keycode {
