@@ -21,4 +21,3 @@ image = { version = "0.24", default-features = false, features = [
 [dev-dependencies]
 glam = "0.23.0"
 rand = "0.8.0"
-gif = "0.12.0"

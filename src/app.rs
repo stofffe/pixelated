@@ -26,6 +26,7 @@ pub struct Config {
     pub window_height: u32,
     pub resizeable: bool,
     pub fullscreen: bool,
+    pub scale_canvas_to_window: bool,
 }
 
 impl Default for Config {
@@ -37,13 +38,14 @@ impl Default for Config {
             window_width: 512,
             resizeable: false,
             fullscreen: false,
+            scale_canvas_to_window: false,
         }
     }
 }
 
 /// Main App
 /// Contains all data to run application
-pub struct App<C: Callbacks> {
+pub(crate) struct App<C: Callbacks> {
     pub(crate) callbacks: C,
 }
 
@@ -69,7 +71,7 @@ where
     }
 }
 
-/// Runts event loop with callbacks
+/// Runs the event loop
 /// Calls back to user defined functions thorugh Callback trait
 pub fn run<C: Callbacks + 'static>(callbacks: C)
 where
@@ -85,7 +87,7 @@ where
 }
 
 // TODO contex builder?
-pub async fn build_context(config: &Config) -> (Context, EventLoop<()>) {
+async fn build_context(config: &Config) -> (Context, EventLoop<()>) {
     let (window, event_loop) = window::new_window(config);
 
     let time = TimeContext::default();

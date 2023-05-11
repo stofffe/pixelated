@@ -2,6 +2,7 @@ use std::fs::File;
 
 use gif::{Encoder, Frame, Repeat};
 use image::{ImageResult, RgbaImage};
+use winit::dpi::PhysicalSize;
 
 const DEFAULT_CLEAR_COLOR: [u8; 4] = [0, 0, 0, 255];
 
@@ -10,8 +11,6 @@ pub struct Canvas {
     pub(crate) pixels: Vec<u8>,
     pub(crate) width: u32,
     pub(crate) height: u32,
-    screenshot_uploader: ScreenshotUploader,
-    gif_uploader: GifUploader,
     clear_color: [u8; 4],
 }
 
@@ -22,24 +21,18 @@ impl Canvas {
         let mut pixels = Vec::new();
         pixels.resize(capacity as usize, 0);
 
-        let screenshot_uploader = ScreenshotUploader::new(width, height);
-        let gif_uploader = GifUploader::new(width, height);
-
         let clear_color = DEFAULT_CLEAR_COLOR;
 
         Self {
             pixels,
             width,
             height,
-            screenshot_uploader,
-            gif_uploader,
             clear_color,
         }
     }
 
     /// Resizes the canvas
     /// Clears screen to ```clear_color```
-    // TODO resize screenshot uploader
     pub fn resize(&mut self, width: u32, height: u32) {
         let capacity = width * height * 4;
 
@@ -47,10 +40,12 @@ impl Canvas {
         self.width = width;
         self.height = height;
 
-        self.screenshot_uploader.resize(width, height);
-        self.gif_uploader.resize(width, height);
-
         self.clear_screen();
+    }
+
+    /// Resizes the canvas to match the window physical size
+    pub fn scale_to_window(&mut self, size: &PhysicalSize<u32>) {
+        self.resize(size.width, size.height);
     }
 
     /// Clone pixel buffer
@@ -203,16 +198,6 @@ impl Canvas {
     pub fn capacity(&self) -> u32 {
         self.width * self.height * 4
     }
-
-    /// Get canvas width
-    pub fn width(&self) -> u32 {
-        self.width
-    }
-
-    /// Get canvas height
-    pub fn height(&self) -> u32 {
-        self.height
-    }
 }
 
 /// Asserts a pixel is inside the screen
@@ -256,46 +241,27 @@ fn assert_rgba(color: &[f32; 4]) {
     );
 }
 
-// Media
-impl Canvas {
-    pub fn export_screenshot(&self, path: &str) -> ImageResult<()> {
-        self.screenshot_uploader.export_to_file(&self.pixels, path)
-    }
-
-    pub fn record_gif_frame(&mut self) {
-        self.gif_uploader.record(self.pixels.clone());
-    }
-
-    pub fn export_gif(&mut self, path: &str) {
-        self.gif_uploader.export_to_gif(path);
-    }
-
-    pub fn clear_gif_frames(&mut self) {
-        self.gif_uploader.clear();
-    }
-}
-
 // Upload screenshots and gifs
 
 /// Can take screenshots of a canvas
-struct ScreenshotUploader {
+pub(crate) struct ScreenshotUploader {
     width: u32,
     height: u32,
 }
 
 impl ScreenshotUploader {
     /// Create ScreenshotUploader with specific width and height
-    fn new(width: u32, height: u32) -> Self {
+    pub fn new(width: u32, height: u32) -> Self {
         Self { width, height }
     }
 
-    fn resize(&mut self, width: u32, height: u32) {
+    pub fn resize(&mut self, width: u32, height: u32) {
         self.width = width;
         self.height = height;
     }
 
     /// Export current state of canvas to a image at the specified path
-    fn export_to_file(&self, pixels: &[u8], path: &str) -> ImageResult<()> {
+    pub fn export_to_file(&self, pixels: &[u8], path: &str) -> ImageResult<()> {
         let mut img = RgbaImage::new(self.width, self.height);
 
         img.copy_from_slice(pixels);
@@ -306,7 +272,7 @@ impl ScreenshotUploader {
 
 /// Can record gif of canvas frames
 #[derive(Default)]
-struct GifUploader {
+pub(crate) struct GifUploader {
     frames: Vec<Vec<u8>>,
     width: u32,
     height: u32,
@@ -315,7 +281,7 @@ struct GifUploader {
 impl GifUploader {
     /// Create GifUploader with specific width and height
     /// frame_skip specifies how many frames to step by when exporting to gif
-    fn new(width: u32, height: u32) -> Self {
+    pub fn new(width: u32, height: u32) -> Self {
         Self {
             width,
             height,
@@ -323,18 +289,19 @@ impl GifUploader {
         }
     }
 
-    fn resize(&mut self, width: u32, height: u32) {
+    pub fn resize(&mut self, width: u32, height: u32) {
         self.width = width;
         self.height = height;
     }
 
     /// Record the current canvas into a frame
-    fn record(&mut self, pixels: Vec<u8>) {
+    pub fn record(&mut self, pixels: Vec<u8>) {
         self.frames.push(pixels);
     }
 
     /// Export the current frames to a file at specified path
-    fn export_to_gif(&mut self, path: &str) {
+    // TODO need to be mut
+    pub fn export_to_gif(&mut self, path: &str) {
         let file = File::create(path).unwrap();
         let mut encoder = Encoder::new(&file, self.width as u16, self.height as u16, &[]).unwrap();
 
@@ -351,7 +318,7 @@ impl GifUploader {
     }
 
     /// Clear current frames
-    fn clear(&mut self) {
+    pub fn clear(&mut self) {
         self.frames.clear();
     }
 }

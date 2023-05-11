@@ -1,9 +1,14 @@
-use crate::{app::Config, canvas::Canvas};
+use crate::{
+    app::Config,
+    canvas::{Canvas, GifUploader, ScreenshotUploader},
+};
 use wgpu::util::DeviceExt;
 use winit::window::Window;
 
 pub struct RenderContext {
-    pub canvas: Canvas,
+    pub(crate) canvas: Canvas,
+    pub(crate) screenshot_uploader: ScreenshotUploader,
+    pub(crate) gif_uploader: GifUploader,
     pub(crate) surface: wgpu::Surface,
     pub(crate) device: wgpu::Device,
     pub(crate) queue: wgpu::Queue,
@@ -208,6 +213,9 @@ impl RenderContext {
         let num_indices = INDICES.len() as u32;
 
         let canvas = Canvas::new(config.canvas_width, config.canvas_height);
+        let screenshot_uploader =
+            ScreenshotUploader::new(config.canvas_width, config.canvas_height);
+        let gif_uploader = GifUploader::new(config.canvas_width, config.canvas_height);
 
         Self {
             window,
@@ -224,6 +232,8 @@ impl RenderContext {
             texture: diffuse_texture,
             texture_size,
             canvas,
+            screenshot_uploader,
+            gif_uploader,
         }
     }
 

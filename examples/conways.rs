@@ -1,9 +1,10 @@
 use pixel_renderer::{
     app::{Callbacks, Config},
-    context::Context,
-    input::KeyCode,
+    cmd::{canvas, keyboard, mouse},
+    Context,
 };
 use winit::event::MouseButton;
+use winit::event::VirtualKeyCode as KeyCode;
 
 const WIDTH: u32 = 50;
 const HEIGHT: u32 = 50;
@@ -91,36 +92,37 @@ impl Conways {
 
 impl Callbacks for Conways {
     fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
-        let mouse = &ctx.input.mouse;
-        let keyboard = &ctx.input.keyboard;
-        let mouse_pos = mouse.last_pixel_pos(&ctx.render);
+        let mouse_pos = mouse::mouse_pos_pixel(ctx);
 
         // Input and update
-        if mouse.on_screen() {
-            if mouse.button_pressed(MouseButton::Left) {
+        if mouse::mouse_on_screen(ctx) {
+            if mouse::mouse_button_pressed(ctx, MouseButton::Left) {
                 self.create_cell(mouse_pos.0, mouse_pos.1);
             }
-            if mouse.button_pressed(MouseButton::Right) {
+            if mouse::mouse_button_pressed(ctx, MouseButton::Right) {
                 self.kill_cell(mouse_pos.0, mouse_pos.1);
             }
         }
 
-        if keyboard.key_pressed(KeyCode::Space) {
+        // if keyboard.key_pressed(KeyCode::R) {
+        //     ctx.render.canvas.scale_to_window(&ctx.render.size);
+        // }
+
+        if keyboard::key_pressed(ctx, KeyCode::Space) {
             self.update();
         }
 
         // Draw
-        let canvas = &mut ctx.render.canvas;
-        canvas.clear_screen();
+        canvas::clear_screen(ctx);
         for y in 0..self.height {
             for x in 0..self.width {
                 if self.is_alive(x, y) {
-                    canvas.write_pixel(x, y, &[255, 255, 255]);
+                    canvas::write_pixel(ctx, x, y, &[255, 255, 255]);
                 }
             }
         }
-        if mouse.on_screen() {
-            canvas.write_pixel_blend(mouse_pos.0, mouse_pos.1, &[255, 255, 255, 255 / 2]);
+        if mouse::mouse_on_screen(ctx) {
+            canvas::write_pixel_blend(ctx, mouse_pos.0, mouse_pos.1, &[255, 255, 255, 255 / 2]);
         }
 
         false

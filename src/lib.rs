@@ -1,7 +1,15 @@
+mod canvas;
+mod context;
+mod input;
+mod render;
+mod time;
+mod window;
+
+// Public modules
 pub mod app;
-pub mod canvas;
-pub mod context;
-pub mod input;
-pub mod render;
-pub mod time;
-pub mod window;
+pub mod cmd;
+
+// Re-exports
+pub use context::Context;
+pub use winit::event::MouseButton;
+pub use winit::event::VirtualKeyCode as KeyCode;

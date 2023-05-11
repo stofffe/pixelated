@@ -1,7 +1,7 @@
 use std::time;
 
 pub struct TimeContext {
-    pub(crate) current_time: time::SystemTime,
+    pub current_time: time::SystemTime,
 }
 
 impl Default for TimeContext {
@@ -12,7 +12,7 @@ impl Default for TimeContext {
 }
 
 impl TimeContext {
-    pub(crate) fn update_time(&mut self) -> f32 {
+    pub fn update_time(&mut self) -> f32 {
         let new_time = std::time::SystemTime::now();
         let time_since = self.time_since(new_time);
         self.current_time = new_time;

@@ -1,8 +1,9 @@
 use pixel_renderer::{
     app::{Callbacks, Config},
-    context::Context,
-    input::KeyCode,
+    cmd::{canvas, keyboard, media},
+    Context,
 };
+use winit::event::VirtualKeyCode as KeyCode;
 
 struct Game {}
 
@@ -11,20 +12,17 @@ const HEIGHT: u32 = 256;
 
 impl Callbacks for Game {
     fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
-        let canvas = &mut ctx.render.canvas;
-        let keyboard = &ctx.input.keyboard;
-
-        canvas.clear_screen();
+        canvas::clear_screen(ctx);
 
         for y in 75..175 {
             for x in 75..175 {
-                canvas.write_pixel(x, y, &[0, 255, 255]);
+                canvas::write_pixel(ctx, x, y, &[0, 255, 255]);
             }
         }
 
-        if keyboard.key_just_pressed(KeyCode::S) {
+        if keyboard::key_just_pressed(ctx, KeyCode::S) {
             let path = "examples/outputs/minimal.png";
-            canvas.export_screenshot(path).unwrap();
+            media::export_screenshot(ctx, path).unwrap();
             println!("saved screenshot to {}", path);
         }
 

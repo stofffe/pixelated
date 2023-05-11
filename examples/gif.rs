@@ -1,8 +1,9 @@
 use pixel_renderer::{
     app::{Callbacks, Config},
-    context::Context,
-    input::KeyCode,
+    cmd::{canvas, keyboard, media},
+    Context,
 };
+use winit::event::VirtualKeyCode as KeyCode;
 
 struct Game {
     box_x: f32,
@@ -17,44 +18,41 @@ const BOX_VELOCITY: f32 = 1.0;
 
 impl Callbacks for Game {
     fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
-        let canvas = &mut ctx.render.canvas;
-        let keyboard = &ctx.input.keyboard;
-
         // Move box
         self.box_x += BOX_VELOCITY;
         if self.box_x > 240.0 {
             self.box_x = 10.0;
         }
 
-        canvas.clear_screen();
+        canvas::clear_screen(ctx);
 
         // Display box
         let box_x = self.box_x as u32;
         let box_y = self.box_y as u32;
         for y in box_y..box_y + BOX_HEIGHT {
             for x in box_x..box_x + BOX_WIDTH {
-                canvas.write_pixel(x, y, &[0, 255, 255]);
+                canvas::write_pixel(ctx, x, y, &[0, 255, 255]);
             }
         }
 
-        if keyboard.key_pressed(KeyCode::R) {
-            canvas.record_gif_frame();
+        if keyboard::key_pressed(ctx, KeyCode::R) {
+            media::record_gif_frame(ctx);
             println!("recording frame");
         }
-        if keyboard.key_just_pressed(KeyCode::G) {
+        if keyboard::key_just_pressed(ctx, KeyCode::G) {
             let path = "examples/outputs/gif.gif";
             println!("creating gif");
-            canvas.export_gif(path);
-            canvas.clear_gif_frames();
+            media::export_gif(ctx, path);
+            media::clear_gif_frames(ctx);
             println!("saved gif to {}", path);
         }
-        if keyboard.key_just_pressed(KeyCode::S) {
+        if keyboard::key_just_pressed(ctx, KeyCode::S) {
             let path = "examples/outputs/gif.png";
-            canvas.export_screenshot(path).unwrap();
+            media::export_screenshot(ctx, path).unwrap();
             println!("saved screenshot to {}", path);
         }
-        if keyboard.key_just_pressed(KeyCode::C) {
-            canvas.clear_gif_frames();
+        if keyboard::key_just_pressed(ctx, KeyCode::C) {
+            media::clear_gif_frames(ctx);
             println!("cleared frames");
         }
 
