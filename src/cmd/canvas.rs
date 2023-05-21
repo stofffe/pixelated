@@ -1,5 +1,9 @@
 use crate::context::Context;
 
+pub fn pixel_ref(ctx: &mut Context) -> &mut Vec<u8> {
+    &mut ctx.render.canvas.pixels
+}
+
 /// Write pixel data to a coordinate (r,g,b,a)
 /// Overwrites previous pixel
 pub fn write_pixel(ctx: &mut Context, x: u32, y: u32, color: &[u8; 3]) {
