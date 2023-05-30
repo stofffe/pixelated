@@ -1,9 +1,8 @@
+use crate::Context;
 use winit::{
     dpi::PhysicalSize,
     window::{CursorGrabMode, Fullscreen},
 };
-
-use crate::Context;
 
 /// Enables/Disables borderless windowed mode
 pub fn set_fullscreen(ctx: &mut Context, fullscreen: bool) {
@@ -33,9 +32,9 @@ pub fn set_cursor_enabled(ctx: &mut Context, enabled: bool) {
     // TODO handle error
     ctx.render.window.set_cursor_visible(enabled);
     let grab_mode = if enabled {
-        CursorGrabMode::Locked
-    } else {
         CursorGrabMode::None
+    } else {
+        CursorGrabMode::Locked
     };
     ctx.render.window.set_cursor_grab(grab_mode).unwrap();
 }
