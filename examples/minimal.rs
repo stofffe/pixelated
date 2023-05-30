@@ -4,18 +4,20 @@ use pixel_renderer::{
     Context, KeyCode,
 };
 
-struct Game {}
-
 const WIDTH: u32 = 256;
 const HEIGHT: u32 = 256;
+
+struct Game {}
 
 impl Callbacks for Game {
     fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
         canvas::clear_screen(ctx);
 
-        for y in 75..175 {
-            for x in 75..175 {
-                canvas::write_pixel(ctx, x, y, &[0, 255, 255]);
+        let (px, py) = (75, 75);
+        let (wx, wy) = (100, 100);
+        for y in 0..wx {
+            for x in 0..wy {
+                canvas::write_pixel(ctx, x + px, y + py, &[0, 255, 255]);
             }
         }
 

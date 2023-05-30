@@ -2,9 +2,9 @@ use winit::event::MouseButton;
 
 use crate::context::Context;
 
-/// Returns the current change in
-pub fn mouse_change(ctx: &Context) -> (f32, f32) {
-    let (dx, dy) = ctx.input.mouse.mouse_change();
+/// Returns the mouse delta for the current frame
+pub fn mouse_delta(ctx: &Context) -> (f32, f32) {
+    let (dx, dy) = ctx.input.mouse.mouse_delta();
     (dx as f32, dy as f32)
 }
 

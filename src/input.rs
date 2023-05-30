@@ -15,7 +15,7 @@ pub struct InputContext {
 pub struct MouseContext {
     on_screen: bool,
     pos: (f64, f64),
-    change: (f64, f64),
+    delta: (f64, f64),
     pressed: HashSet<MouseButton>,
     previous_pressed: HashSet<MouseButton>,
 }
@@ -60,13 +60,13 @@ impl MouseContext {
     }
 
     /// Returns the (dx, dy) change in mouse position
-    pub fn mouse_change(&self) -> (f64, f64) {
-        self.change
+    pub fn mouse_delta(&self) -> (f64, f64) {
+        self.delta
     }
 
     /// Sets the (dx, dy) change in mouse position
-    pub(crate) fn set_mouse_change(&mut self, change: (f64, f64)) {
-        self.change = change;
+    pub(crate) fn set_mouse_delta(&mut self, change: (f64, f64)) {
+        self.delta = change;
     }
 
     /// Sets mouse off screen

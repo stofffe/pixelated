@@ -321,9 +321,6 @@ fn create_pipeline(
     });
 
     (render_pipeline, diffuse_texture, diffuse_bind_group)
-    // self.diffuse_bind_group = diffuse_bind_group;
-    // self.texture = diffuse_texture;
-    // self.render_pipeline = render_pipeline;
 }
 
 /// Vertex representation

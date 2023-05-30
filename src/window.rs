@@ -69,7 +69,7 @@ pub(crate) async fn run_window<C: Callbacks + 'static>(
             }
         }
         Event::DeviceEvent { ref event, .. } => match event {
-            DeviceEvent::MouseMotion { delta } => ctx.input.mouse.set_mouse_change(*delta),
+            DeviceEvent::MouseMotion { delta } => ctx.input.mouse.set_mouse_delta(*delta),
             _ => {}
         },
         Event::RedrawRequested(window_id) if window_id == ctx.render.window.id() => {

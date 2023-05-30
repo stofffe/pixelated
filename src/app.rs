@@ -64,7 +64,7 @@ where
 
         ctx.input.keyboard.save_keys();
         ctx.input.mouse.save_buttons();
-        ctx.input.mouse.set_mouse_change((0.0, 0.0));
+        ctx.input.mouse.set_mouse_delta((0.0, 0.0));
 
         false
     }
