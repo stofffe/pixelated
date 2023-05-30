@@ -1,7 +1,7 @@
 use crate::canvas::{
     Canvas, GifUploader, ScreenshotUploader, DEFAULT_CANVAS_HEIGHT, DEFAULT_CANVAS_WIDTH,
 };
-use wgpu::{util::DeviceExt, Device, SurfaceConfiguration};
+use wgpu::{util::DeviceExt, Adapter, Device, PresentMode, Surface, SurfaceConfiguration};
 use winit::window::Window;
 
 pub struct RenderContext {
@@ -10,6 +10,7 @@ pub struct RenderContext {
     pub(crate) gif_uploader: GifUploader,
     pub(crate) surface: wgpu::Surface,
     pub(crate) device: wgpu::Device,
+    pub(crate) adapter: wgpu::Adapter,
     pub(crate) queue: wgpu::Queue,
     pub(crate) surface_config: wgpu::SurfaceConfiguration,
     pub(crate) window_size: winit::dpi::PhysicalSize<u32>,
@@ -56,23 +57,26 @@ impl RenderContext {
 
         // Configure surface
         let size = window.inner_size();
-        let surface_caps = surface.get_capabilities(&adapter);
-        let surface_format: wgpu::TextureFormat = surface_caps
-            .formats
-            .iter()
-            .copied()
-            .find(|f| f.describe().srgb)
-            .unwrap_or(surface_caps.formats[0]);
-        let surface_config = wgpu::SurfaceConfiguration {
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-            format: surface_format,
-            width: size.width,
-            height: size.height,
-            present_mode: surface_caps.present_modes[0],
-            alpha_mode: surface_caps.alpha_modes[0],
-            view_formats: vec![],
-        };
+        let surface_config =
+            create_surface_config(&window, &surface, &adapter, PresentMode::AutoVsync);
         surface.configure(&device, &surface_config);
+        // let surface_caps = surface.get_capabilities(&adapter);
+        // let surface_format: wgpu::TextureFormat = surface_caps
+        //     .formats
+        //     .iter()
+        //     .copied()
+        //     .find(|f| f.describe().srgb)
+        //     .unwrap_or(surface_caps.formats[0]);
+        // let surface_config = wgpu::SurfaceConfiguration {
+        //     usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+        //     format: surface_format,
+        //     width: size.width,
+        //     height: size.height,
+        //     // present_mode: surface_caps.present_modes[0],
+        //     present_mode: PresentMode::AutoVsync,
+        //     alpha_mode: surface_caps.alpha_modes[0],
+        //     view_formats: vec![],
+        // };
 
         let (render_pipeline, texture, diffuse_bind_group) = create_pipeline(
             &device,
@@ -114,6 +118,7 @@ impl RenderContext {
             window,
             surface,
             device,
+            adapter,
             queue,
             surface_config,
             window_size: size,
@@ -135,6 +140,11 @@ impl RenderContext {
         self.render_pipeline = pipeline;
         self.texture = texture;
         self.diffuse_bind_group = bind_group;
+    }
+
+    pub(crate) fn reconfigure_present_mode(&mut self, present_mode: PresentMode) {
+        self.surface_config.present_mode = present_mode;
+        self.surface.configure(&self.device, &self.surface_config);
     }
 
     pub(crate) fn resize_window(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
@@ -203,6 +213,33 @@ impl RenderContext {
         output.present();
 
         Ok(())
+    }
+}
+
+fn create_surface_config(
+    window: &Window,
+    surface: &Surface,
+    adapter: &Adapter,
+    present_mode: PresentMode,
+) -> SurfaceConfiguration {
+    let size = window.inner_size();
+    let surface_caps = surface.get_capabilities(adapter);
+    let surface_format: wgpu::TextureFormat = surface_caps
+        .formats
+        .iter()
+        .copied()
+        .find(|f| f.describe().srgb)
+        .unwrap_or(surface_caps.formats[0]);
+    wgpu::SurfaceConfiguration {
+        usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+        format: surface_format,
+        width: size.width,
+        height: size.height,
+        // present_mode: surface_caps.present_modes[0],
+        // present_mode: PresentMode::AutoVsync,
+        present_mode,
+        alpha_mode: surface_caps.alpha_modes[0],
+        view_formats: vec![],
     }
 }
 

@@ -1,6 +1,6 @@
 use pixel_renderer::{
     app::Callbacks,
-    cmd::{canvas, keyboard, media},
+    cmd::{canvas, keyboard, media, window},
     Context, KeyCode,
 };
 
@@ -12,6 +12,8 @@ struct Game {}
 impl Callbacks for Game {
     fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
         canvas::clear_screen(ctx);
+
+        println!("{_dt}");
 
         let (px, py) = (75, 75);
         let (wx, wy) = (100, 100);

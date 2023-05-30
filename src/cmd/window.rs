@@ -1,8 +1,18 @@
 use crate::Context;
+use wgpu::PresentMode;
 use winit::{
     dpi::PhysicalSize,
     window::{CursorGrabMode, Fullscreen},
 };
+
+pub fn set_vsync(ctx: &mut Context, vsync: bool) {
+    let present_mode = if vsync {
+        PresentMode::AutoVsync
+    } else {
+        PresentMode::AutoNoVsync
+    };
+    ctx.render.reconfigure_present_mode(present_mode);
+}
 
 /// Enables/Disables borderless windowed mode
 pub fn set_fullscreen(ctx: &mut Context, fullscreen: bool) {
