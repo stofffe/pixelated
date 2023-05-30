@@ -35,8 +35,8 @@ impl MouseContext {
     pub fn last_pixel_pos(&self, ctx: &RenderContext) -> (u32, u32) {
         // When holding the mouse button down pos can get bigger than physical size
         // So clamp to avoid out of bounds
-        let relative_x = self.pos.0 / ctx.size.width as f64;
-        let relative_y = self.pos.1 / ctx.size.height as f64;
+        let relative_x = self.pos.0 / ctx.window_size.width as f64;
+        let relative_y = self.pos.1 / ctx.window_size.height as f64;
         let pixel_x = relative_x * ctx.canvas.width as f64;
         let pixel_y = relative_y * ctx.canvas.height as f64;
         (pixel_x as u32, pixel_y as u32)
@@ -81,9 +81,9 @@ impl MouseContext {
         // Check if mouse is on screen
         // When holding mouse button CursorLeft event will not be called so need check here
         if pos.0 >= 0.0
-            && pos.0 < ctx.size.width as f64
+            && pos.0 < ctx.window_size.width as f64
             && pos.1 >= 0.0
-            && pos.1 < ctx.size.height as f64
+            && pos.1 < ctx.window_size.height as f64
         {
             self.on_screen = true;
         } else {

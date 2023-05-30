@@ -1,5 +1,5 @@
 use pixel_renderer::{
-    app::{Callbacks, Config},
+    app::Callbacks,
     cmd::{canvas, keyboard, mouse},
     Context,
 };
@@ -104,10 +104,6 @@ impl Callbacks for Conways {
             }
         }
 
-        // if keyboard.key_pressed(KeyCode::R) {
-        //     ctx.render.canvas.scale_to_window(&ctx.render.size);
-        // }
-
         if keyboard::key_pressed(ctx, KeyCode::Space) {
             self.update();
         }
@@ -128,13 +124,8 @@ impl Callbacks for Conways {
         false
     }
 
-    fn config(&self) -> Config {
-        Config {
-            canvas_width: WIDTH,
-            canvas_height: HEIGHT,
-            resizeable: true,
-            ..Default::default()
-        }
+    fn init(&self, ctx: &mut Context) {
+        canvas::resize(ctx, WIDTH, HEIGHT);
     }
 }
 

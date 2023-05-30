@@ -6,9 +6,7 @@ use winit::event_loop::EventLoop;
 /// User callbaks
 pub trait Callbacks {
     /// Called before initalization
-    fn config(&self) -> Config {
-        Config::default()
-    }
+    fn init(&self, _ctx: &mut Context) {}
 
     /// Called once per frame before render
     /// Return value determines wether to exit game or not
@@ -19,29 +17,29 @@ pub trait Callbacks {
 }
 
 /// Config for initalizing window and game loop
-pub struct Config {
-    pub canvas_width: u32,
-    pub canvas_height: u32,
-    pub window_width: u32,
-    pub window_height: u32,
-    pub resizeable: bool,
-    pub fullscreen: bool,
-    pub scale_canvas_to_window: bool,
-}
+// pub struct Config {
+//     pub canvas_width: u32,
+//     pub canvas_height: u32,
+//     pub window_width: u32,
+//     pub window_height: u32,
+//     pub resizeable: bool,
+//     pub fullscreen: bool,
+//     pub scale_canvas_to_window: bool,
+// }
 
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            canvas_width: 512,
-            canvas_height: 512,
-            window_height: 512,
-            window_width: 512,
-            resizeable: false,
-            fullscreen: false,
-            scale_canvas_to_window: false,
-        }
-    }
-}
+// impl Default for Config {
+//     fn default() -> Self {
+//         Self {
+//             canvas_width: 512,
+//             canvas_height: 512,
+//             window_height: 512,
+//             window_width: 512,
+//             resizeable: false,
+//             fullscreen: false,
+//             scale_canvas_to_window: false,
+//         }
+//     }
+// }
 
 /// Main App
 /// Contains all data to run application
@@ -66,6 +64,7 @@ where
 
         ctx.input.keyboard.save_keys();
         ctx.input.mouse.save_buttons();
+        ctx.input.mouse.set_mouse_change((0.0, 0.0));
 
         false
     }
@@ -80,19 +79,20 @@ where
     env_logger::init();
     let app = App { callbacks };
 
-    let config = app.callbacks.config();
+    let (mut ctx, event_loop) = pollster::block_on(build_context());
 
-    let (ctx, event_loop) = pollster::block_on(build_context(&config));
+    app.callbacks.init(&mut ctx);
+
     pollster::block_on(window::run_window(event_loop, app, ctx));
 }
 
 // TODO contex builder?
-async fn build_context(config: &Config) -> (Context, EventLoop<()>) {
-    let (window, event_loop) = window::new_window(config);
+async fn build_context() -> (Context, EventLoop<()>) {
+    let (window, event_loop) = window::new_window();
 
     let time = TimeContext::default();
     let input = InputContext::default();
-    let render = RenderContext::new(window, config).await;
+    let render = RenderContext::new(window).await;
     let context = Context {
         render,
         time,

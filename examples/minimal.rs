@@ -1,9 +1,8 @@
 use pixel_renderer::{
-    app::{Callbacks, Config},
+    app::Callbacks,
     cmd::{canvas, keyboard, media},
-    Context,
+    Context, KeyCode,
 };
-use winit::event::VirtualKeyCode as KeyCode;
 
 struct Game {}
 
@@ -29,13 +28,8 @@ impl Callbacks for Game {
         false
     }
 
-    fn config(&self) -> Config {
-        Config {
-            canvas_width: WIDTH,
-            canvas_height: HEIGHT,
-            resizeable: true,
-            ..Default::default()
-        }
+    fn init(&self, ctx: &mut Context) {
+        canvas::resize(ctx, WIDTH, HEIGHT);
     }
 }
 

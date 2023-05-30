@@ -1,5 +1,5 @@
 use pixel_renderer::{
-    app::{Callbacks, Config},
+    app::Callbacks,
     cmd::{canvas, keyboard, media},
     Context,
 };
@@ -59,12 +59,8 @@ impl Callbacks for Game {
         false
     }
 
-    fn config(&self) -> Config {
-        Config {
-            canvas_width: WIDTH,
-            canvas_height: HEIGHT,
-            ..Default::default()
-        }
+    fn init(&self, ctx: &mut Context) {
+        canvas::resize(ctx, WIDTH, HEIGHT);
     }
 }
 

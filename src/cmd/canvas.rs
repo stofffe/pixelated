@@ -1,5 +1,12 @@
 use crate::context::Context;
 
+pub fn scale_to_window(ctx: &mut Context) {
+    let size = ctx.render.window.inner_size();
+    resize(ctx, size.width, size.height);
+}
+
+/// Gets raw reference to the pixel array
+/// Stored as list of u8 chunks of 4 (rgba)
 pub fn pixel_ref(ctx: &mut Context) -> &mut Vec<u8> {
     &mut ctx.render.canvas.pixels
 }
@@ -48,6 +55,7 @@ pub fn resize(ctx: &mut Context, width: u32, height: u32) {
     ctx.render.canvas.resize(width, height);
     ctx.render.screenshot_uploader.resize(width, height);
     ctx.render.gif_uploader.resize(width, height);
+    ctx.render.resize_canvas_texture(width, height);
 }
 
 /// Set canvas clear color (r,g,b,a)

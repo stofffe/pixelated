@@ -1,27 +1,24 @@
 use winit::{
-    dpi::PhysicalSize,
     event::{DeviceEvent, ElementState, Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    window::{Fullscreen, WindowBuilder},
+    window::WindowBuilder,
 };
 
 use crate::{
-    app::{App, Callbacks, Config},
+    app::{App, Callbacks},
     context::Context,
 };
 
-pub(crate) fn new_window(
-    config: &Config,
-) -> (winit::window::Window, winit::event_loop::EventLoop<()>) {
+pub(crate) fn new_window() -> (winit::window::Window, winit::event_loop::EventLoop<()>) {
     let event_loop = EventLoop::new();
 
     let window = WindowBuilder::new()
-        .with_resizable(config.resizeable)
-        .with_inner_size(PhysicalSize::new(config.window_width, config.window_height))
-        .with_fullscreen(match config.fullscreen {
-            true => Some(Fullscreen::Borderless(None)),
-            false => None,
-        })
+        // .with_resizable(config.resizeable)
+        // .with_inner_size(PhysicalSize::new(config.window_width, config.window_height))
+        // .with_fullscreen(match config.fullscreen {
+        //     true => Some(Fullscreen::Borderless(None)),
+        //     false => None,
+        // })
         .build(&event_loop)
         .unwrap();
 
@@ -42,10 +39,10 @@ pub(crate) async fn run_window<C: Callbacks + 'static>(
                 match event {
                     WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                     WindowEvent::Resized(physical_size) => {
-                        ctx.render.resize(*physical_size);
+                        ctx.render.resize_window(*physical_size);
                     }
                     WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                        ctx.render.resize(**new_inner_size);
+                        ctx.render.resize_window(**new_inner_size);
                     }
                     WindowEvent::CursorMoved { position, .. } => {
                         ctx.input
@@ -78,7 +75,7 @@ pub(crate) async fn run_window<C: Callbacks + 'static>(
         Event::RedrawRequested(window_id) if window_id == ctx.render.window.id() => {
             match ctx.render.render() {
                 Ok(_) => {}
-                Err(wgpu::SurfaceError::Lost) => ctx.render.resize(ctx.render.size),
+                Err(wgpu::SurfaceError::Lost) => ctx.render.resize_window(ctx.render.window_size),
                 Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
                 Err(e) => eprintln!("{:?}", e),
             }
