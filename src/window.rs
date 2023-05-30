@@ -1,6 +1,6 @@
 use winit::{
     dpi::PhysicalSize,
-    event::{ElementState, Event, WindowEvent},
+    event::{DeviceEvent, ElementState, Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     window::{Fullscreen, WindowBuilder},
 };
@@ -37,34 +37,42 @@ pub(crate) async fn run_window<C: Callbacks + 'static>(
         Event::WindowEvent {
             ref event,
             window_id,
-        } if window_id == ctx.render.window.id() => match event {
-            WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
-            WindowEvent::Resized(physical_size) => {
-                ctx.render.resize(*physical_size);
-            }
-            WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
-                ctx.render.resize(**new_inner_size);
-            }
-            WindowEvent::CursorMoved { position, .. } => {
-                ctx.input
-                    .mouse
-                    .set_pos((position.x, position.y), &ctx.render);
-            }
-            WindowEvent::MouseInput { state, button, .. } => match state {
-                ElementState::Pressed => ctx.input.mouse.set_buttons(*button),
-                ElementState::Released => ctx.input.mouse.release_button(*button),
-            },
-            WindowEvent::CursorLeft { .. } => {
-                ctx.input.mouse.set_off_screen();
-            }
-            WindowEvent::KeyboardInput { input, .. } => {
-                if let Some(keycode) = input.virtual_keycode {
-                    match input.state {
-                        ElementState::Pressed => ctx.input.keyboard.set_key(keycode),
-                        ElementState::Released => ctx.input.keyboard.release_key(keycode),
+        } => {
+            if window_id == ctx.render.window.id() {
+                match event {
+                    WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
+                    WindowEvent::Resized(physical_size) => {
+                        ctx.render.resize(*physical_size);
                     }
+                    WindowEvent::ScaleFactorChanged { new_inner_size, .. } => {
+                        ctx.render.resize(**new_inner_size);
+                    }
+                    WindowEvent::CursorMoved { position, .. } => {
+                        ctx.input
+                            .mouse
+                            .set_pos((position.x, position.y), &ctx.render);
+                    }
+                    WindowEvent::MouseInput { state, button, .. } => match state {
+                        ElementState::Pressed => ctx.input.mouse.set_buttons(*button),
+                        ElementState::Released => ctx.input.mouse.release_button(*button),
+                    },
+                    WindowEvent::CursorLeft { .. } => {
+                        ctx.input.mouse.set_off_screen();
+                    }
+                    WindowEvent::KeyboardInput { input, .. } => {
+                        if let Some(keycode) = input.virtual_keycode {
+                            match input.state {
+                                ElementState::Pressed => ctx.input.keyboard.set_key(keycode),
+                                ElementState::Released => ctx.input.keyboard.release_key(keycode),
+                            }
+                        }
+                    }
+                    _ => {}
                 }
             }
+        }
+        Event::DeviceEvent { ref event, .. } => match event {
+            DeviceEvent::MouseMotion { delta } => ctx.input.mouse.set_mouse_change(*delta),
             _ => {}
         },
         Event::RedrawRequested(window_id) if window_id == ctx.render.window.id() => {

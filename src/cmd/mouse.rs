@@ -2,6 +2,11 @@ use winit::event::MouseButton;
 
 use crate::context::Context;
 
+pub fn mouse_change(ctx: &Context) -> (f32, f32) {
+    let (dx, dy) = ctx.input.mouse.mouse_change();
+    (dx as f32, dy as f32)
+}
+
 /// Returns if mouse is on screen or not
 pub fn mouse_on_screen(ctx: &Context) -> bool {
     ctx.input.mouse.on_screen()

@@ -15,6 +15,7 @@ pub struct InputContext {
 pub struct MouseContext {
     on_screen: bool,
     pos: (f64, f64),
+    change: (f64, f64),
     pressed: HashSet<MouseButton>,
     previous_pressed: HashSet<MouseButton>,
 }
@@ -54,8 +55,18 @@ impl MouseContext {
     }
 
     /// Returns true is MouseButton was released this frame
-    pub(crate) fn button_released(&self, keycode: MouseButton) -> bool {
+    pub fn button_released(&self, keycode: MouseButton) -> bool {
         !self.pressed.contains(&keycode) && self.previous_pressed.contains(&keycode)
+    }
+
+    /// Returns the (dx, dy) change in mouse position
+    pub fn mouse_change(&self) -> (f64, f64) {
+        self.change
+    }
+
+    /// Sets the (dx, dy) change in mouse position
+    pub(crate) fn set_mouse_change(&mut self, change: (f64, f64)) {
+        self.change = change;
     }
 
     /// Sets mouse off screen
