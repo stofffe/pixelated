@@ -3,7 +3,9 @@ use std::fs::File;
 use gif::{Encoder, Frame, Repeat};
 use image::{ImageResult, RgbaImage};
 
-const DEFAULT_CLEAR_COLOR: [u8; 4] = [0, 0, 0, 255];
+pub(crate) const DEFAULT_CLEAR_COLOR: [u8; 4] = [0, 0, 0, 255];
+pub(crate) const DEFAULT_CANVAS_WIDTH: u32 = 512;
+pub(crate) const DEFAULT_CANVAS_HEIGHT: u32 = 512;
 
 /// Represent the screen of pixels
 pub struct Canvas {

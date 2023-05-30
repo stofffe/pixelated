@@ -1,9 +1,8 @@
-use crate::canvas::{Canvas, GifUploader, ScreenshotUploader};
+use crate::canvas::{
+    Canvas, GifUploader, ScreenshotUploader, DEFAULT_CANVAS_HEIGHT, DEFAULT_CANVAS_WIDTH,
+};
 use wgpu::{util::DeviceExt, Device, SurfaceConfiguration};
 use winit::window::Window;
-
-const DEFAULT_CANVAS_WIDTH: u32 = 512;
-const DEFAULT_CANVAS_HEIGHT: u32 = 512;
 
 pub struct RenderContext {
     pub(crate) canvas: Canvas,
@@ -78,7 +77,7 @@ impl RenderContext {
         let (render_pipeline, texture, diffuse_bind_group) = create_pipeline(
             &device,
             &surface_config,
-            DEFAULT_CANVAS_HEIGHT,
+            DEFAULT_CANVAS_WIDTH,
             DEFAULT_CANVAS_HEIGHT,
         );
 
