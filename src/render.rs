@@ -56,28 +56,11 @@ impl RenderContext {
             .unwrap();
 
         // Configure surface
-        let size = window.inner_size();
         let surface_config =
             create_surface_config(&window, &surface, &adapter, PresentMode::AutoVsync);
         surface.configure(&device, &surface_config);
-        // let surface_caps = surface.get_capabilities(&adapter);
-        // let surface_format: wgpu::TextureFormat = surface_caps
-        //     .formats
-        //     .iter()
-        //     .copied()
-        //     .find(|f| f.describe().srgb)
-        //     .unwrap_or(surface_caps.formats[0]);
-        // let surface_config = wgpu::SurfaceConfiguration {
-        //     usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-        //     format: surface_format,
-        //     width: size.width,
-        //     height: size.height,
-        //     // present_mode: surface_caps.present_modes[0],
-        //     present_mode: PresentMode::AutoVsync,
-        //     alpha_mode: surface_caps.alpha_modes[0],
-        //     view_formats: vec![],
-        // };
 
+        // Create pipeline
         let (render_pipeline, texture, diffuse_bind_group) = create_pipeline(
             &device,
             &surface_config,
@@ -109,10 +92,14 @@ impl RenderContext {
 
         let num_indices = INDICES.len() as u32;
 
+        // Media
         let canvas = Canvas::new(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
         let screenshot_uploader =
             ScreenshotUploader::new(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
         let gif_uploader = GifUploader::new(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
+
+        // Window size
+        let size = window.inner_size();
 
         Self {
             window,
@@ -236,7 +223,6 @@ fn create_surface_config(
         width: size.width,
         height: size.height,
         // present_mode: surface_caps.present_modes[0],
-        // present_mode: PresentMode::AutoVsync,
         present_mode,
         alpha_mode: surface_caps.alpha_modes[0],
         view_formats: vec![],
