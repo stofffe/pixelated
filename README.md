@@ -39,6 +39,7 @@ fn main() {
 
 ```
 
+Output
 ![Example](./examples/outputs/minimal.png)
 
 See full example in examples/minimal.rs
