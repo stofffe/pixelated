@@ -39,4 +39,6 @@ fn main() {
 
 ```
 
+![Example](./examples/outputs/minimal.png)
+
 See full example in examples/minimal.rs
