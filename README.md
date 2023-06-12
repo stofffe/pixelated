@@ -1,9 +1,13 @@
-# pixel-renderer
+# pixel-render
 
-Simple pixel renderer using a pixel buffer which is then converted to a texture and rendered using wgpu. Main focus is simplicity
-and being able to easily play around with.
+Small opinionated game engine focusing on simplicity.
 
-## Minimal example
+Features
+- Pixel renderer
+- Keyboard and mouse input
+- Ability to screenshot and create gifs
+
+### Minimal example
 
 ```rust
 const WIDTH: u32 = 256;
@@ -42,4 +46,8 @@ fn main() {
 Output  
 ![Example](./examples/outputs/minimal.png)
 
-See full example in examples/minimal.rs
+More examples can be seen in [examples](https://github.com/stofffe/pixel-renderer/tree/main/examples). 
+
+### Projects using pixel-renderer
+
+- [Software raymarcher](https://github.com/stofffe/software-raymarcher)
