@@ -11,5 +11,6 @@ pub mod cmd;
 
 // Re-exports
 pub use context::Context;
+pub use input::KeyModifier;
 pub use winit::event::MouseButton;
 pub use winit::event::VirtualKeyCode as KeyCode;

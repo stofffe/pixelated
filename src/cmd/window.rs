@@ -5,6 +5,7 @@ use winit::{
     window::{CursorGrabMode, Fullscreen},
 };
 
+/// Enables/Disables vsync
 pub fn set_vsync(ctx: &mut Context, vsync: bool) {
     let present_mode = if vsync {
         PresentMode::AutoVsync
@@ -48,8 +49,3 @@ pub fn set_cursor_enabled(ctx: &mut Context, enabled: bool) {
     };
     ctx.render.window.set_cursor_grab(grab_mode).unwrap();
 }
-
-// /// Raw reference to the window
-// pub fn get_window(ctx: &mut Context) -> &Window {
-//     &ctx.render.window
-// }

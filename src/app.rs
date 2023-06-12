@@ -16,31 +16,6 @@ pub trait Callbacks {
     }
 }
 
-/// Config for initalizing window and game loop
-// pub struct Config {
-//     pub canvas_width: u32,
-//     pub canvas_height: u32,
-//     pub window_width: u32,
-//     pub window_height: u32,
-//     pub resizeable: bool,
-//     pub fullscreen: bool,
-//     pub scale_canvas_to_window: bool,
-// }
-
-// impl Default for Config {
-//     fn default() -> Self {
-//         Self {
-//             canvas_width: 512,
-//             canvas_height: 512,
-//             window_height: 512,
-//             window_width: 512,
-//             resizeable: false,
-//             fullscreen: false,
-//             scale_canvas_to_window: false,
-//         }
-//     }
-// }
-
 /// Main App
 /// Contains all data to run application
 pub(crate) struct App<C: Callbacks> {
@@ -62,9 +37,12 @@ where
             return true;
         }
 
+        // Reset input
         ctx.input.keyboard.save_keys();
+        ctx.input.keyboard.save_modifiers();
         ctx.input.mouse.save_buttons();
         ctx.input.mouse.set_mouse_delta((0.0, 0.0));
+        // TODO mouse delta?
 
         false
     }
