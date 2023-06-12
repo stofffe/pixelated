@@ -1,6 +1,6 @@
 use pixel_renderer::{
     app::Callbacks,
-    cmd::{canvas, keyboard, media},
+    cmd::{canvas, keyboard, media, time},
     Context, KeyCode,
 };
 
