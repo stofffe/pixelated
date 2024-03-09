@@ -13,6 +13,10 @@ const BOX_HEIGHT: u32 = 10;
 const BOX_VELOCITY: f32 = 1.0;
 
 impl Callbacks for Game {
+    fn init(&self, ctx: &mut Context) {
+        canvas::resize(ctx, WIDTH, HEIGHT);
+    }
+
     fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
         // Move box
         self.box_x += BOX_VELOCITY;
@@ -53,10 +57,6 @@ impl Callbacks for Game {
         }
 
         false
-    }
-
-    fn init(&self, ctx: &mut Context) {
-        canvas::resize(ctx, WIDTH, HEIGHT);
     }
 }
 

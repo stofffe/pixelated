@@ -88,6 +88,10 @@ impl Conways {
 }
 
 impl Callbacks for Conways {
+    fn init(&self, ctx: &mut Context) {
+        canvas::resize(ctx, WIDTH, HEIGHT);
+    }
+
     fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
         let mouse_pos = input::mouse_pos_pixel(ctx);
 
@@ -119,10 +123,6 @@ impl Callbacks for Conways {
         }
 
         false
-    }
-
-    fn init(&self, ctx: &mut Context) {
-        canvas::resize(ctx, WIDTH, HEIGHT);
     }
 }
 

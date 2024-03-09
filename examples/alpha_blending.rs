@@ -7,6 +7,10 @@ const WIDTH: u32 = 256;
 const HEIGHT: u32 = 256;
 
 impl Callbacks for Game {
+    fn init(&self, ctx: &mut Context) {
+        canvas::resize(ctx, WIDTH, HEIGHT);
+    }
+
     fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
         canvas::set_clear_color(ctx, &[255, 255, 255]);
         canvas::clear_screen(ctx);
@@ -39,10 +43,6 @@ impl Callbacks for Game {
         }
 
         false
-    }
-
-    fn init(&self, ctx: &mut Context) {
-        canvas::resize(ctx, WIDTH, HEIGHT);
     }
 }
 
