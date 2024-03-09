@@ -1,9 +1,8 @@
 pub use winit::event::VirtualKeyCode as KeyCode;
-use winit::event::{ModifiersState, MouseButton};
 
+use crate::{render::RenderContext, Context};
 use std::collections::HashSet;
-
-use crate::render::RenderContext;
+use winit::event::{ModifiersState, MouseButton};
 
 #[derive(Default)]
 pub struct InputContext {
@@ -24,51 +23,54 @@ pub struct MouseContext {
 impl MouseContext {
     /// Returns true if Button is down
     /// Accepts repeating
-    pub fn button_pressed(&self, keycode: MouseButton) -> bool {
+    fn button_pressed(&self, keycode: MouseButton) -> bool {
         self.pressed.contains(&keycode)
     }
 
     /// Returns true if Button was pressed this frame
     /// Does not accept repeating
-    pub fn button_just_pressed(&self, keycode: MouseButton) -> bool {
+    fn button_just_pressed(&self, keycode: MouseButton) -> bool {
         self.pressed.contains(&keycode) && !self.previous_pressed.contains(&keycode)
     }
 
     /// Returns true is MouseButton was released this frame
-    pub fn button_released(&self, keycode: MouseButton) -> bool {
+    fn button_released(&self, keycode: MouseButton) -> bool {
         !self.pressed.contains(&keycode) && self.previous_pressed.contains(&keycode)
     }
 
     /// Returns if mouse is on screen or not
-    pub fn on_screen(&self) -> bool {
+    fn on_screen(&self) -> bool {
         self.on_screen
     }
 
     /// Returns the current physical coordinates for the mouse
-    pub fn mouse_pos_physical(&self) -> (f64, f64) {
+    fn mouse_pos_physical(&self) -> (f64, f64) {
         self.pos
     }
 
     /// Returns the current pixel under the mouse
-    pub fn mouse_pos_pixel(&self, ctx: &RenderContext) -> (u32, u32) {
+    fn mouse_pos_pixel(&self, ctx: &RenderContext) -> (u32, u32) {
         // When holding the mouse button down pos can get bigger than physical size
         // So clamp to avoid out of bounds
-        let relative_x = self.pos.0 / ctx.window_size.width as f64;
-        let relative_y = self.pos.1 / ctx.window_size.height as f64;
+        let window_size = ctx.window.inner_size();
+        let relative_x = self.pos.0 / window_size.width as f64;
+        let relative_y = self.pos.1 / window_size.height as f64;
         let pixel_x = relative_x * ctx.canvas.width as f64;
         let pixel_y = relative_y * ctx.canvas.height as f64;
         (pixel_x as u32, pixel_y as u32)
     }
 
     /// Returns the (dx, dy) change in mouse position
-    pub fn mouse_delta(&self) -> (f64, f64) {
+    fn mouse_delta(&self) -> (f64, f64) {
         self.mouse_delta
     }
 
-    pub fn scroll_delta(&self) -> (f64, f64) {
+    fn scroll_delta(&self) -> (f64, f64) {
         self.scroll_delta
     }
+}
 
+impl MouseContext {
     /// Sets mouse off screen
     pub(crate) fn set_on_screen(&mut self, on_screen: bool) {
         self.on_screen = on_screen;
@@ -105,6 +107,53 @@ impl MouseContext {
     }
 }
 
+//
+// Mouse commands
+//
+
+/// Returns the mouse delta for the current frame
+pub fn mouse_delta(ctx: &Context) -> (f32, f32) {
+    let (dx, dy) = ctx.input.mouse.mouse_delta();
+    (dx as f32, dy as f32)
+}
+
+/// Returns if mouse is on screen or not
+pub fn mouse_on_screen(ctx: &Context) -> bool {
+    ctx.input.mouse.on_screen()
+}
+
+/// Returns the current physical coordinates for the mouse
+pub fn mouse_pos_physical(ctx: &Context) -> (f64, f64) {
+    ctx.input.mouse.mouse_pos_physical()
+}
+
+/// Returns the current pixel under the mouse
+pub fn mouse_pos_pixel(ctx: &Context) -> (u32, u32) {
+    ctx.input.mouse.mouse_pos_pixel(&ctx.render)
+}
+
+/// Returns true if MouseButton is pressed
+/// Accepts repeating
+pub fn mouse_button_pressed(ctx: &Context, keycode: MouseButton) -> bool {
+    ctx.input.mouse.button_pressed(keycode)
+}
+
+/// Returns true if MouseButton was pressed this frame
+pub fn mouse_button_just_pressed(ctx: &Context, keycode: MouseButton) -> bool {
+    ctx.input.mouse.button_just_pressed(keycode)
+}
+
+/// Returns true if MouseButton was released this frame
+pub fn mouse_button_released(ctx: &Context, keycode: MouseButton) -> bool {
+    ctx.input.mouse.button_released(keycode)
+}
+
+/// Returns the scroll delta for the current frame
+pub fn scroll_delta(ctx: &Context) -> (f32, f32) {
+    let (dx, dy) = ctx.input.mouse.scroll_delta();
+    (dx as f32, dy as f32)
+}
+
 #[derive(Default)]
 pub struct KeyboardContext {
     pressed: HashSet<KeyCode>,
@@ -125,31 +174,31 @@ pub enum KeyModifier {
 impl KeyboardContext {
     /// Returns true if KeyCode is down
     /// Accepts repeating
-    pub fn key_pressed(&self, keycode: KeyCode) -> bool {
+    fn key_pressed(&self, keycode: KeyCode) -> bool {
         self.pressed.contains(&keycode)
     }
 
     /// Returns true if KeyCode was pressed this frame
     /// Does not accepts repeating
-    pub fn key_just_pressed(&self, keycode: KeyCode) -> bool {
+    fn key_just_pressed(&self, keycode: KeyCode) -> bool {
         self.pressed.contains(&keycode) && !self.previous_pressed.contains(&keycode)
     }
 
     /// Returns true is KeyCode was released this frame
-    pub fn key_released(&self, keycode: KeyCode) -> bool {
+    fn key_released(&self, keycode: KeyCode) -> bool {
         !self.pressed.contains(&keycode) && self.previous_pressed.contains(&keycode)
     }
 
-    pub fn modifier_pressed(&self, modifier: KeyModifier) -> bool {
+    fn modifier_pressed(&self, modifier: KeyModifier) -> bool {
         self.pressed_modifiers.contains(&modifier)
     }
 
-    pub fn modifier_just_pressed(&self, modifier: KeyModifier) -> bool {
+    fn modifier_just_pressed(&self, modifier: KeyModifier) -> bool {
         self.pressed_modifiers.contains(&modifier)
             && !self.previous_pressed_modifiers.contains(&modifier)
     }
 
-    pub fn modifier_released(&self, modifier: KeyModifier) -> bool {
+    fn modifier_released(&self, modifier: KeyModifier) -> bool {
         !self.pressed_modifiers.contains(&modifier)
             && self.previous_pressed_modifiers.contains(&modifier)
     }
@@ -188,9 +237,47 @@ impl KeyboardContext {
         self.previous_pressed = self.pressed.clone();
     }
 
+    /// Save current keys modifiers in previous
+    /// Should be called each frame
     pub(crate) fn save_modifiers(&mut self) {
         self.previous_pressed_modifiers = self.pressed_modifiers.clone();
     }
+}
+
+//
+// Keyboard commands
+//
+
+/// Returns true if KeyCode is pressed
+/// Accepts repeating
+pub fn key_pressed(ctx: &Context, keycode: KeyCode) -> bool {
+    ctx.input.keyboard.key_pressed(keycode)
+}
+
+/// Returns true if KeyCode was pressed this frame
+pub fn key_just_pressed(ctx: &Context, keycode: KeyCode) -> bool {
+    ctx.input.keyboard.key_just_pressed(keycode)
+}
+
+/// Returns true is KeyCode was released this frame
+pub fn key_released(ctx: &Context, keycode: KeyCode) -> bool {
+    ctx.input.keyboard.key_released(keycode)
+}
+
+/// Returns true if KeyModifer is pressed
+/// Accepts repeating
+pub fn modifier_pressed(ctx: &Context, key_modifier: KeyModifier) -> bool {
+    ctx.input.keyboard.modifier_pressed(key_modifier)
+}
+
+/// Returns true if KeyModifer was pressed this frame
+pub fn modifer_just_pressed(ctx: &Context, key_modifier: KeyModifier) -> bool {
+    ctx.input.keyboard.modifier_just_pressed(key_modifier)
+}
+
+/// Returns true if KeyModifier was released this frame
+pub fn modifer_released(ctx: &Context, key_modifier: KeyModifier) -> bool {
+    ctx.input.keyboard.modifier_released(key_modifier)
 }
 
 #[cfg(test)]

@@ -1,12 +1,13 @@
-use winit::{
-    event::{DeviceEvent, ElementState, Event, WindowEvent},
-    event_loop::{ControlFlow, EventLoop},
-    window::WindowBuilder,
-};
+#![allow(clippy::single_match, clippy::collapsible_match)]
 
 use crate::{
     app::{App, Callbacks},
     context::Context,
+};
+use winit::{
+    event::{DeviceEvent, ElementState, Event, WindowEvent},
+    event_loop::{ControlFlow, EventLoop},
+    window::WindowBuilder,
 };
 
 pub(crate) fn new_window() -> (winit::window::Window, winit::event_loop::EventLoop<()>) {
@@ -82,9 +83,10 @@ pub(crate) async fn run_window<C: Callbacks + 'static>(
             _ => {}
         },
         Event::RedrawRequested(window_id) if window_id == ctx.render.window.id() => {
+            let new_size = ctx.render.window.inner_size();
             match ctx.render.render() {
                 Ok(_) => {}
-                Err(wgpu::SurfaceError::Lost) => ctx.render.resize_window(ctx.render.window_size),
+                Err(wgpu::SurfaceError::Lost) => ctx.render.resize_window(new_size),
                 Err(wgpu::SurfaceError::OutOfMemory) => *control_flow = ControlFlow::Exit,
                 Err(e) => eprintln!("{:?}", e),
             }
@@ -97,4 +99,53 @@ pub(crate) async fn run_window<C: Callbacks + 'static>(
         }
         _ => {}
     });
+}
+
+//
+// Commands
+//
+
+/// Enables/Disables vsync
+pub fn set_vsync(ctx: &mut Context, vsync: bool) {
+    let present_mode = if vsync {
+        wgpu::PresentMode::AutoVsync
+    } else {
+        wgpu::PresentMode::AutoNoVsync
+    };
+    ctx.render.reconfigure_present_mode(present_mode);
+}
+
+/// Enables/Disables borderless windowed mode
+pub fn set_fullscreen(ctx: &mut Context, fullscreen: bool) {
+    let fullscreen_mode = if fullscreen {
+        Some(winit::window::Fullscreen::Borderless(None))
+    } else {
+        None
+    };
+    ctx.render.window.set_fullscreen(fullscreen_mode);
+}
+
+/// Enables/Disables window resizing
+pub fn set_resizeable(ctx: &mut Context, resizable: bool) {
+    ctx.render.window.set_resizable(resizable);
+}
+
+/// Sets the inner size of the window
+pub fn set_size(ctx: &mut Context, size: (u32, u32)) {
+    ctx.render
+        .window
+        .set_inner_size(winit::dpi::PhysicalSize::new(size.0, size.1));
+}
+
+/// Enables/Disables the cursor
+/// If disabled: Turns off cursor and locks cursor to middle of window
+pub fn set_cursor_enabled(ctx: &mut Context, enabled: bool) {
+    // TODO handle error
+    ctx.render.window.set_cursor_visible(enabled);
+    let grab_mode = if enabled {
+        winit::window::CursorGrabMode::None
+    } else {
+        winit::window::CursorGrabMode::Locked
+    };
+    ctx.render.window.set_cursor_grab(grab_mode).unwrap();
 }

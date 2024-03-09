@@ -1,8 +1,4 @@
-use pixel_renderer::{
-    app::Callbacks,
-    cmd::{canvas, keyboard, media},
-    Context,
-};
+use pixel_renderer::{app::Callbacks, canvas, input, media, Context};
 use winit::event::VirtualKeyCode as KeyCode;
 
 struct Game {}
@@ -36,7 +32,7 @@ impl Callbacks for Game {
             }
         }
 
-        if keyboard::key_just_pressed(ctx, KeyCode::S) {
+        if input::key_just_pressed(ctx, KeyCode::S) {
             let path = "examples/outputs/alpha_blending.png";
             media::export_screenshot(ctx, path).unwrap();
             println!("saved screenshot to {}", path);

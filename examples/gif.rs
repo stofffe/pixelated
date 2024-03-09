@@ -1,8 +1,4 @@
-use pixel_renderer::{
-    app::Callbacks,
-    cmd::{canvas, keyboard, media},
-    Context,
-};
+use pixel_renderer::{app::Callbacks, canvas, input, media, Context};
 use winit::event::VirtualKeyCode as KeyCode;
 
 struct Game {
@@ -35,23 +31,23 @@ impl Callbacks for Game {
             }
         }
 
-        if keyboard::key_pressed(ctx, KeyCode::R) {
+        if input::key_pressed(ctx, KeyCode::R) {
             media::record_gif_frame(ctx);
             println!("recording frame");
         }
-        if keyboard::key_just_pressed(ctx, KeyCode::G) {
+        if input::key_just_pressed(ctx, KeyCode::G) {
             let path = "examples/outputs/gif.gif";
             println!("creating gif");
             media::export_gif(ctx, path);
             media::clear_gif_frames(ctx);
             println!("saved gif to {}", path);
         }
-        if keyboard::key_just_pressed(ctx, KeyCode::S) {
+        if input::key_just_pressed(ctx, KeyCode::S) {
             let path = "examples/outputs/gif.png";
             media::export_screenshot(ctx, path).unwrap();
             println!("saved screenshot to {}", path);
         }
-        if keyboard::key_just_pressed(ctx, KeyCode::C) {
+        if input::key_just_pressed(ctx, KeyCode::C) {
             media::clear_gif_frames(ctx);
             println!("cleared frames");
         }

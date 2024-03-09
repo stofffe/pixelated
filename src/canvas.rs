@@ -1,7 +1,4 @@
-use std::fs::File;
-
-use gif::{Encoder, Frame, Repeat};
-use image::{ImageResult, RgbaImage};
+use crate::Context;
 
 pub(crate) const DEFAULT_CLEAR_COLOR: [u8; 4] = [0, 0, 0, 255]; // Black
 pub(crate) const DEFAULT_CANVAS_WIDTH: u32 = 512;
@@ -19,11 +16,8 @@ impl Canvas {
     /// Create new canvas with specified width and height
     pub fn new(width: u32, height: u32) -> Self {
         let capacity = width * height * 4;
-        let mut pixels = Vec::new();
-        pixels.resize(capacity as usize, 0);
-
+        let pixels = vec![0; capacity as usize];
         let clear_color = DEFAULT_CLEAR_COLOR;
-
         Self {
             pixels,
             width,
@@ -237,86 +231,99 @@ fn assert_rgba(color: &[f32; 4]) {
     );
 }
 
-// Upload screenshots and gifs
-
-/// Can take screenshots of a canvas
-pub(crate) struct ScreenshotUploader {
-    width: u32,
-    height: u32,
+// Commands
+pub fn scale_to_window(ctx: &mut Context) {
+    let size = ctx.render.window.inner_size();
+    resize(ctx, size.width, size.height);
 }
 
-impl ScreenshotUploader {
-    /// Create ScreenshotUploader with specific width and height
-    pub(crate) fn new(width: u32, height: u32) -> Self {
-        Self { width, height }
-    }
-
-    pub(crate) fn resize(&mut self, width: u32, height: u32) {
-        self.width = width;
-        self.height = height;
-    }
-
-    /// Export current state of canvas to a image at the specified path
-    pub(crate) fn export_to_file(&self, pixels: &[u8], path: &str) -> ImageResult<()> {
-        let mut img = RgbaImage::new(self.width, self.height);
-
-        img.copy_from_slice(pixels);
-
-        img.save(path)
-    }
+/// Gets raw reference to the pixel array
+/// Stored as list of u8 chunks of 4 (rgba)
+pub fn pixel_ref(ctx: &mut Context) -> &mut Vec<u8> {
+    &mut ctx.render.canvas.pixels
 }
 
-/// Can record gif of canvas frames
-#[derive(Default)]
-pub(crate) struct GifUploader {
-    frames: Vec<Vec<u8>>,
-    width: u32,
-    height: u32,
+/// Write pixel data to a coordinate (r,g,b,a)
+/// Overwrites previous pixel
+pub fn write_pixel(ctx: &mut Context, x: u32, y: u32, color: &[u8; 3]) {
+    ctx.render.canvas.write_pixel(x, y, color);
 }
 
-impl GifUploader {
-    /// Create GifUploader with specific width and height
-    /// frame_skip specifies how many frames to step by when exporting to gif
-    pub(crate) fn new(width: u32, height: u32) -> Self {
-        Self {
-            width,
-            height,
-            frames: Vec::default(),
-        }
-    }
+/// Write pixel data to a coordinate (r,g,b,a)
+/// Panics if trying to write outside canvas
+/// RGBA must be in range [0,1]
+pub fn write_pixel_f32(ctx: &mut Context, x: u32, y: u32, color: &[f32; 3]) {
+    ctx.render.canvas.write_pixel_f32(x, y, color);
+}
 
-    pub(crate) fn resize(&mut self, width: u32, height: u32) {
-        self.width = width;
-        self.height = height;
-    }
+/// Write pixel data to a coordinate (r,g,b,a)
+/// Non premultiplied alpha blending
+pub fn write_pixel_blend(ctx: &mut Context, x: u32, y: u32, color: &[u8; 4]) {
+    ctx.render.canvas.write_pixel_blend(x, y, color);
+}
 
-    /// Record the current canvas into a frame
-    pub(crate) fn record(&mut self, pixels: Vec<u8>) {
-        self.frames.push(pixels);
-    }
+/// Write pixel data to a coordinate (r,g,b,a)
+/// Non premultiplied alpha blending
+/// RGBA must be in range [0,1]
+pub fn write_pixel_blend_f32(ctx: &mut Context, x: u32, y: u32, color: &[f32; 4]) {
+    ctx.render.canvas.write_pixel_blend_f32(x, y, color);
+}
 
-    /// Export the current frames to a file at specified path
-    // TODO need to be mut
-    pub(crate) fn export_to_gif(&mut self, path: &str) {
-        let file = File::create(path).unwrap();
-        let mut encoder = Encoder::new(&file, self.width as u16, self.height as u16, &[]).unwrap();
+/// Get pixel data for a coordianate
+/// Panics if trying to access outside canvas
+pub fn get_pixel(ctx: &Context, x: u32, y: u32) -> [u8; 3] {
+    ctx.render.canvas.get_pixel(x, y)
+}
 
-        encoder.set_repeat(Repeat::Infinite).unwrap();
+/// Get pixel data for a coordianate
+/// Panics if trying to access outside canvas
+pub fn get_pixel_alpha(ctx: &Context, x: u32, y: u32) -> [u8; 4] {
+    ctx.render.canvas.get_pixel_alpha(x, y)
+}
 
-        for frame in self.frames.iter_mut() {
-            let mut rgba = RgbaImage::new(self.width, self.height);
-            rgba.copy_from_slice(frame);
+/// Resizes the canvas and the media uploaders
+/// Clears screen to ```clear_color```
+pub fn resize(ctx: &mut Context, width: u32, height: u32) {
+    ctx.render.canvas.resize(width, height);
+    ctx.render.screenshot_uploader.resize(width, height);
+    ctx.render.gif_uploader.resize(width, height);
+    ctx.render.resize_canvas_texture(width, height);
+}
 
-            let mut gif_frame = Frame::from_rgba(self.width as u16, self.height as u16, frame);
-            gif_frame.delay = 1;
-            encoder.write_frame(&gif_frame).unwrap();
-        }
-    }
+/// Set canvas clear color (r,g,b,a)
+pub fn set_clear_color(ctx: &mut Context, color: &[u8; 3]) {
+    ctx.render.canvas.set_clear_color(color);
+}
 
-    /// Clear current frames
-    pub(crate) fn clear(&mut self) {
-        self.frames.clear();
-    }
+/// Set canvas clear color (r,g,b)
+/// Values must lie in range [0,1]
+pub fn set_clear_color_f32(ctx: &mut Context, color: &[f32; 3]) {
+    ctx.render.canvas.set_clear_color_f32(color);
+}
+
+/// Clears all pixels in canvas to clear color
+pub fn clear_screen(ctx: &mut Context) {
+    ctx.render.canvas.clear_screen();
+}
+
+/// Get canvas capacity
+pub fn capacity(ctx: &Context) -> u32 {
+    ctx.render.canvas.capacity()
+}
+
+/// Get canvas width
+pub fn width(ctx: &Context) -> u32 {
+    ctx.render.canvas.width
+}
+
+/// Get canvas height
+pub fn height(ctx: &Context) -> u32 {
+    ctx.render.canvas.height
+}
+
+/// Get current pixel buffer
+pub fn pixel_buffer(ctx: &Context) -> Vec<u8> {
+    ctx.render.canvas.get_pixel_buffer()
 }
 
 // Tests

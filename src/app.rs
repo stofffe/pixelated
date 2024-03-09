@@ -42,7 +42,6 @@ where
         ctx.input.keyboard.save_modifiers();
         ctx.input.mouse.save_buttons();
         ctx.input.mouse.set_mouse_delta((0.0, 0.0));
-        // TODO mouse delta?
 
         false
     }

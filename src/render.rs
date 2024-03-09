@@ -1,27 +1,30 @@
-use crate::canvas::{
-    Canvas, GifUploader, ScreenshotUploader, DEFAULT_CANVAS_HEIGHT, DEFAULT_CANVAS_WIDTH,
+use crate::{
+    canvas::{Canvas, DEFAULT_CANVAS_HEIGHT, DEFAULT_CANVAS_WIDTH},
+    media::{GifUploader, ScreenshotUploader},
 };
 use wgpu::{util::DeviceExt, Adapter, Device, PresentMode, Surface, SurfaceConfiguration};
 use winit::window::Window;
 
 pub struct RenderContext {
+    #[allow(dead_code)]
+    pub(crate) adapter: wgpu::Adapter,
+    pub(crate) device: wgpu::Device,
+    pub(crate) queue: wgpu::Queue,
+    pub(crate) surface: wgpu::Surface,
+    pub(crate) surface_config: wgpu::SurfaceConfiguration,
+    pub(crate) window: Window,
+
     pub(crate) canvas: Canvas,
+
     pub(crate) screenshot_uploader: ScreenshotUploader,
     pub(crate) gif_uploader: GifUploader,
-    pub(crate) surface: wgpu::Surface,
-    pub(crate) device: wgpu::Device,
-    pub(crate) adapter: wgpu::Adapter,
-    pub(crate) queue: wgpu::Queue,
-    pub(crate) surface_config: wgpu::SurfaceConfiguration,
-    pub(crate) window_size: winit::dpi::PhysicalSize<u32>,
-    pub(crate) window: Window,
-    pub(crate) render_pipeline: wgpu::RenderPipeline,
+
     pub(crate) vertex_buffer: wgpu::Buffer,
     pub(crate) index_buffer: wgpu::Buffer,
-    pub(crate) num_indices: u32,
-    pub(crate) diffuse_bind_group: wgpu::BindGroup,
+    pub(crate) render_pipeline: wgpu::RenderPipeline,
+
     pub(crate) texture: wgpu::Texture,
-    // pub(crate) texture_size: wgpu::Extent3d,
+    pub(crate) texture_bind_group: wgpu::BindGroup,
 }
 
 impl RenderContext {
@@ -68,38 +71,23 @@ impl RenderContext {
             DEFAULT_CANVAS_HEIGHT,
         );
 
-        // Vertex and index buffer
-        #[rustfmt::skip]
-        const VERTICES: &[Vertex] = &[
-            Vertex { position: [-1.0, -1.0, 0.0], uv: [0.0, 1.0]},
-            Vertex { position: [1.0,  -1.0, 0.0], uv: [1.0, 1.0]},
-            Vertex { position: [-1.0, 1.0,  0.0], uv: [0.0, 0.0]},
-            Vertex { position: [1.0,  1.0,  0.0], uv: [1.0, 0.0]},
-        ];
-        const INDICES: &[u16] = &[0, 1, 2, 3, 2, 1];
-
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Vertex Buffer"),
-            contents: bytemuck::cast_slice(VERTICES),
+            contents: bytemuck::cast_slice(SCREEN_QUAD_VERTICES),
             usage: wgpu::BufferUsages::VERTEX,
         });
 
         let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Index Buffer"),
-            contents: bytemuck::cast_slice(INDICES),
+            contents: bytemuck::cast_slice(SCREEN_QUAD_INDICES),
             usage: wgpu::BufferUsages::INDEX,
         });
-
-        let num_indices = INDICES.len() as u32;
 
         // Media
         let canvas = Canvas::new(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
         let screenshot_uploader =
             ScreenshotUploader::new(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
         let gif_uploader = GifUploader::new(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
-
-        // Window size
-        let size = window.inner_size();
 
         Self {
             window,
@@ -108,12 +96,10 @@ impl RenderContext {
             adapter,
             queue,
             surface_config,
-            window_size: size,
             render_pipeline,
             vertex_buffer,
             index_buffer,
-            num_indices,
-            diffuse_bind_group,
+            texture_bind_group: diffuse_bind_group,
             texture,
             canvas,
             screenshot_uploader,
@@ -126,7 +112,7 @@ impl RenderContext {
             create_pipeline(&self.device, &self.surface_config, width, height);
         self.render_pipeline = pipeline;
         self.texture = texture;
-        self.diffuse_bind_group = bind_group;
+        self.texture_bind_group = bind_group;
     }
 
     pub(crate) fn reconfigure_present_mode(&mut self, present_mode: PresentMode) {
@@ -136,7 +122,6 @@ impl RenderContext {
 
     pub(crate) fn resize_window(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
         if new_size.width > 0 && new_size.height > 0 {
-            self.window_size = new_size;
             self.surface_config.width = new_size.width;
             self.surface_config.height = new_size.height;
             self.surface.configure(&self.device, &self.surface_config);
@@ -190,10 +175,10 @@ impl RenderContext {
                 depth_stencil_attachment: None,
             });
             render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.set_bind_group(0, &self.diffuse_bind_group, &[]);
+            render_pass.set_bind_group(0, &self.texture_bind_group, &[]);
             render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
             render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
-            render_pass.draw_indexed(0..self.num_indices, 0, 0..1);
+            render_pass.draw_indexed(0..SCREEN_QUAD_INDICES.len() as u32, 0, 0..1);
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
@@ -346,6 +331,16 @@ fn create_pipeline(
     (render_pipeline, diffuse_texture, diffuse_bind_group)
 }
 
+// Vertex and index buffer
+#[rustfmt::skip]
+const SCREEN_QUAD_VERTICES: &[Vertex] = &[
+    Vertex { position: [-1.0, -1.0, 0.0], uv: [0.0, 1.0]},
+    Vertex { position: [1.0,  -1.0, 0.0], uv: [1.0, 1.0]},
+    Vertex { position: [-1.0, 1.0,  0.0], uv: [0.0, 0.0]},
+    Vertex { position: [1.0,  1.0,  0.0], uv: [1.0, 0.0]},
+];
+const SCREEN_QUAD_INDICES: &[u16] = &[0, 1, 2, 3, 2, 1];
+
 /// Vertex representation
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
@@ -355,70 +350,16 @@ struct Vertex {
 }
 
 impl Vertex {
-    fn desc<'a>() -> wgpu::VertexBufferLayout<'a> {
+    const SIZE: u64 = std::mem::size_of::<Self>() as wgpu::BufferAddress;
+    const ATTRIBUTES: [wgpu::VertexAttribute; 2] = wgpu::vertex_attr_array![
+        0=>Float32x3,   // pos
+        1=>Float32x2,   // uv
+    ];
+    pub fn desc() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
-            array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
+            array_stride: Self::SIZE,
             step_mode: wgpu::VertexStepMode::Vertex,
-            attributes: &[
-                wgpu::VertexAttribute {
-                    offset: 0,
-                    shader_location: 0,
-                    format: wgpu::VertexFormat::Float32x3,
-                },
-                wgpu::VertexAttribute {
-                    offset: std::mem::size_of::<[f32; 3]>() as wgpu::BufferAddress,
-                    shader_location: 1,
-                    format: wgpu::VertexFormat::Float32x2,
-                },
-            ],
+            attributes: &Self::ATTRIBUTES,
         }
     }
 }
-
-// #[derive(Clone, Copy, Debug, Default, PartialEq)]
-// pub struct Color {
-//     pub r: f32,
-//     pub g: f32,
-//     pub b: f32,
-//     pub a: f32,
-// }
-//
-// #[allow(missing_docs)]
-// impl Color {
-//     pub const TRANSPARENT: Self = Self {
-//         r: 0.0,
-//         g: 0.0,
-//         b: 0.0,
-//         a: 0.0,
-//     };
-//     pub const BLACK: Self = Self {
-//         r: 0.0,
-//         g: 0.0,
-//         b: 0.0,
-//         a: 1.0,
-//     };
-//     pub const WHITE: Self = Self {
-//         r: 1.0,
-//         g: 1.0,
-//         b: 1.0,
-//         a: 1.0,
-//     };
-//     pub const RED: Self = Self {
-//         r: 1.0,
-//         g: 0.0,
-//         b: 0.0,
-//         a: 1.0,
-//     };
-//     pub const GREEN: Self = Self {
-//         r: 0.0,
-//         g: 1.0,
-//         b: 0.0,
-//         a: 1.0,
-//     };
-//     pub const BLUE: Self = Self {
-//         r: 0.0,
-//         g: 0.0,
-//         b: 1.0,
-//         a: 1.0,
-//     };
-// }

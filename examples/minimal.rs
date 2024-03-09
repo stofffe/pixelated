@@ -1,8 +1,4 @@
-use pixel_renderer::{
-    app::Callbacks,
-    cmd::{canvas, keyboard, media, time},
-    Context, KeyCode,
-};
+use pixel_renderer::{app::Callbacks, canvas, input, media, Context, KeyCode};
 
 const WIDTH: u32 = 256;
 const HEIGHT: u32 = 256;
@@ -21,7 +17,7 @@ impl Callbacks for Game {
             }
         }
 
-        if keyboard::key_just_pressed(ctx, KeyCode::S) {
+        if input::key_just_pressed(ctx, KeyCode::S) {
             let path = "examples/outputs/minimal.png";
             media::export_screenshot(ctx, path).unwrap();
             println!("saved screenshot to {}", path);

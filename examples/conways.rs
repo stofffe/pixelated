@@ -1,8 +1,5 @@
-use pixel_renderer::{
-    app::Callbacks,
-    cmd::{canvas, keyboard, mouse},
-    Context,
-};
+use pixel_renderer::{app::Callbacks, Context};
+use pixel_renderer::{canvas, input};
 use winit::event::MouseButton;
 use winit::event::VirtualKeyCode as KeyCode;
 
@@ -92,19 +89,19 @@ impl Conways {
 
 impl Callbacks for Conways {
     fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
-        let mouse_pos = mouse::mouse_pos_pixel(ctx);
+        let mouse_pos = input::mouse_pos_pixel(ctx);
 
         // Input and update
-        if mouse::mouse_on_screen(ctx) {
-            if mouse::mouse_button_pressed(ctx, MouseButton::Left) {
+        if input::mouse_on_screen(ctx) {
+            if input::mouse_button_pressed(ctx, MouseButton::Left) {
                 self.create_cell(mouse_pos.0, mouse_pos.1);
             }
-            if mouse::mouse_button_pressed(ctx, MouseButton::Right) {
+            if input::mouse_button_pressed(ctx, MouseButton::Right) {
                 self.kill_cell(mouse_pos.0, mouse_pos.1);
             }
         }
 
-        if keyboard::key_pressed(ctx, KeyCode::Space) {
+        if input::key_pressed(ctx, KeyCode::Space) {
             self.update();
         }
 
@@ -117,7 +114,7 @@ impl Callbacks for Conways {
                 }
             }
         }
-        if mouse::mouse_on_screen(ctx) {
+        if input::mouse_on_screen(ctx) {
             canvas::write_pixel_blend(ctx, mouse_pos.0, mouse_pos.1, &[255, 255, 255, 255 / 2]);
         }
 

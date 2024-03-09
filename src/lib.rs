@@ -1,13 +1,12 @@
-mod canvas;
-mod context;
-mod input;
-mod render;
-mod time;
-mod window;
-
-// Public modules
 pub mod app;
-pub mod cmd;
+pub mod canvas;
+pub mod input;
+pub mod media;
+pub mod time;
+pub mod window;
+
+mod context;
+mod render;
 
 // Re-exports
 pub use context::Context;
