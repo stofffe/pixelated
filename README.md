@@ -1,6 +1,6 @@
-# pixel-render
+# Pixelated
 
-Small opinionated game engine focusing on simplicity.
+A small opinionated pixel renderer focusing on simplicity.
 
 Features
 
@@ -45,8 +45,4 @@ fn main() {
 Output
 ![Example](./examples/outputs/minimal.png)
 
-More examples can be seen in [examples](https://github.com/stofffe/pixel-renderer/tree/main/examples).
-
-### Projects using pixel-renderer
-
-- [Software raymarcher](https://github.com/stofffe/software-raymarcher)
+More examples can be seen in [examples](https://github.com/stofffe/pixelated/tree/main/examples).
