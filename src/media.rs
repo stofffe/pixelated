@@ -1,11 +1,9 @@
 // Upload screenshots and gifs
 
-use std::fs::File;
-
+use crate::Context;
 use gif::{Encoder, Frame, Repeat};
 use image::{ImageResult, RgbaImage};
-
-use crate::Context;
+use std::fs::File;
 
 /// Can take screenshots of a canvas
 pub(crate) struct ScreenshotUploader {
@@ -66,8 +64,9 @@ impl GifUploader {
     /// Export the current frames to a file at specified path
     // TODO need to be mut
     pub(crate) fn export_to_gif(&mut self, path: &str) {
-        let file = File::create(path).unwrap();
-        let mut encoder = Encoder::new(&file, self.width as u16, self.height as u16, &[]).unwrap();
+        let file = File::create(path).expect("could not create file");
+        let mut encoder = Encoder::new(&file, self.width as u16, self.height as u16, &[])
+            .expect("could nt create gif encoder");
 
         encoder.set_repeat(Repeat::Infinite).unwrap();
 
@@ -77,7 +76,9 @@ impl GifUploader {
 
             let mut gif_frame = Frame::from_rgba(self.width as u16, self.height as u16, frame);
             gif_frame.delay = 1;
-            encoder.write_frame(&gif_frame).unwrap();
+            encoder
+                .write_frame(&gif_frame)
+                .expect("could not write gif frame");
         }
     }
 

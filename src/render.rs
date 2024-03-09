@@ -35,7 +35,8 @@ impl RenderContext {
             backends: wgpu::Backends::all(),
             dx12_shader_compiler: Default::default(),
         });
-        let surface = unsafe { instance.create_surface(&window) }.unwrap();
+        let surface =
+            unsafe { instance.create_surface(&window) }.expect("could not create surface");
 
         // Create adapter. device and queue
         let adapter = instance

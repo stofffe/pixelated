@@ -49,5 +49,5 @@ impl Callbacks for Game {
 fn main() {
     let app = Game {};
     println!("S: to screenshot");
-    pixel_renderer::app::run(app)
+    pixel_renderer::app::run(app);
 }

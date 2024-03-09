@@ -14,14 +14,8 @@ pub(crate) fn new_window() -> (winit::window::Window, winit::event_loop::EventLo
     let event_loop = EventLoop::new();
 
     let window = WindowBuilder::new()
-        // .with_resizable(config.resizeable)
-        // .with_inner_size(PhysicalSize::new(config.window_width, config.window_height))
-        // .with_fullscreen(match config.fullscreen {
-        //     true => Some(Fullscreen::Borderless(None)),
-        //     false => None,
-        // })
         .build(&event_loop)
-        .unwrap();
+        .expect("could not build window");
 
     (window, event_loop)
 }
@@ -147,5 +141,8 @@ pub fn set_cursor_enabled(ctx: &mut Context, enabled: bool) {
     } else {
         winit::window::CursorGrabMode::Locked
     };
-    ctx.render.window.set_cursor_grab(grab_mode).unwrap();
+    ctx.render
+        .window
+        .set_cursor_grab(grab_mode)
+        .expect("could not set cursor grab mode");
 }

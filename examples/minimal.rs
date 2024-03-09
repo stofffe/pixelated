@@ -1,4 +1,9 @@
-use pixel_renderer::{app::Callbacks, canvas, input, media, Context, KeyCode};
+use pixel_renderer::{
+    app::Callbacks,
+    canvas, input, media,
+    window::{self},
+    Context, KeyCode,
+};
 
 const WIDTH: u32 = 256;
 const HEIGHT: u32 = 256;
@@ -6,6 +11,11 @@ const HEIGHT: u32 = 256;
 struct Game {}
 
 impl Callbacks for Game {
+    fn init(&self, ctx: &mut Context) {
+        canvas::resize(ctx, WIDTH, HEIGHT);
+        window::set_resizeable(ctx, true);
+    }
+
     fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
         canvas::clear_screen(ctx);
 
@@ -25,14 +35,10 @@ impl Callbacks for Game {
 
         false
     }
-
-    fn init(&self, ctx: &mut Context) {
-        canvas::resize(ctx, WIDTH, HEIGHT);
-    }
 }
 
 fn main() {
     let app = Game {};
     println!("S: to screenshot");
-    pixel_renderer::app::run(app)
+    pixel_renderer::app::run(app);
 }
