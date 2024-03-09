@@ -1,4 +1,4 @@
-use pixel_renderer::{app::Callbacks, canvas, input, media, Context};
+use pixel_renderer::{canvas, input, media, Callbacks, Context};
 use winit::event::VirtualKeyCode as KeyCode;
 
 struct Game {}
@@ -49,5 +49,5 @@ impl Callbacks for Game {
 fn main() {
     let app = Game {};
     println!("S: to screenshot");
-    pixel_renderer::app::run(app);
+    pixel_renderer::run(app);
 }

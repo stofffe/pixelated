@@ -5,7 +5,7 @@ pub(crate) const DEFAULT_CANVAS_WIDTH: u32 = 512;
 pub(crate) const DEFAULT_CANVAS_HEIGHT: u32 = 512;
 
 /// Represent the screen of pixels
-pub struct Canvas {
+pub(crate) struct Canvas {
     pub(crate) pixels: Vec<u8>,
     pub(crate) width: u32,
     pub(crate) height: u32,
@@ -14,7 +14,7 @@ pub struct Canvas {
 
 impl Canvas {
     /// Create new canvas with specified width and height
-    pub fn new(width: u32, height: u32) -> Self {
+    pub(crate) fn new(width: u32, height: u32) -> Self {
         let capacity = width * height * 4;
         let pixels = vec![0; capacity as usize];
         let clear_color = DEFAULT_CLEAR_COLOR;

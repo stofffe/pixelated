@@ -1,9 +1,4 @@
-use pixel_renderer::{
-    app::Callbacks,
-    canvas, input, media,
-    window::{self},
-    Context, KeyCode,
-};
+use pixel_renderer::{canvas, input, media, window, Callbacks, Context};
 
 const WIDTH: u32 = 256;
 const HEIGHT: u32 = 256;
@@ -27,7 +22,7 @@ impl Callbacks for Game {
             }
         }
 
-        if input::key_just_pressed(ctx, KeyCode::S) {
+        if input::key_just_pressed(ctx, input::KeyCode::S) {
             let path = "examples/outputs/minimal.png";
             media::export_screenshot(ctx, path).unwrap();
             println!("saved screenshot to {}", path);
@@ -40,5 +35,5 @@ impl Callbacks for Game {
 fn main() {
     let app = Game {};
     println!("S: to screenshot");
-    pixel_renderer::app::run(app);
+    pixel_renderer::run(app);
 }

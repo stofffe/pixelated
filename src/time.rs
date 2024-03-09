@@ -2,7 +2,7 @@ use std::time;
 
 use crate::Context;
 
-pub struct TimeContext {
+pub(crate) struct TimeContext {
     pub(crate) start_time: time::SystemTime,
     pub(crate) current_time: time::SystemTime,
 }

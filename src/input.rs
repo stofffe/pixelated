@@ -1,17 +1,18 @@
+pub use winit::event::MouseButton;
 pub use winit::event::VirtualKeyCode as KeyCode;
 
 use crate::{render::RenderContext, Context};
 use std::collections::HashSet;
-use winit::event::{ModifiersState, MouseButton};
+use winit::event::ModifiersState;
 
 #[derive(Default)]
-pub struct InputContext {
+pub(crate) struct InputContext {
     pub keyboard: KeyboardContext,
     pub mouse: MouseContext,
 }
 
 #[derive(Default)]
-pub struct MouseContext {
+pub(crate) struct MouseContext {
     on_screen: bool,
     pos: (f64, f64),
     mouse_delta: (f64, f64),
@@ -155,7 +156,7 @@ pub fn scroll_delta(ctx: &Context) -> (f32, f32) {
 }
 
 #[derive(Default)]
-pub struct KeyboardContext {
+pub(crate) struct KeyboardContext {
     pressed: HashSet<KeyCode>,
     previous_pressed: HashSet<KeyCode>,
     pressed_modifiers: HashSet<KeyModifier>,
