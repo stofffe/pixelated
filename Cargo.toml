@@ -2,6 +2,7 @@
 name = "pixelated"
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.76.0"
 description = "A small opinionated pixel renderer focusing on simplicity."
 homepage = "https://github.com/stofffe/pixelated"
 repository = "https://github.com/stofffe/pixelated"
