@@ -3,7 +3,9 @@ use crate::{
 };
 use winit::event_loop::EventLoop;
 
-/// User callbaks
+/// User callbacks
+///
+/// Will be called from the main event loop
 pub trait Callbacks {
     /// Called before initalization
     fn init(&self, _ctx: &mut Context) {}
