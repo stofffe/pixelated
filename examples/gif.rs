@@ -1,4 +1,4 @@
-use pixel_renderer::{canvas, input, media, Callbacks, Context};
+use pixelated::{canvas, input, media, Callbacks, Context};
 use winit::event::VirtualKeyCode as KeyCode;
 
 struct Game {
@@ -69,5 +69,5 @@ fn main() {
     println!("R: to record frames");
     println!("G: to create gif from frames");
     println!("C: to clear frames");
-    pixel_renderer::run(app)
+    pixelated::run(app)
 }

@@ -1,5 +1,5 @@
-use pixel_renderer::{canvas, input};
-use pixel_renderer::{Callbacks, Context};
+use pixelated::{canvas, input};
+use pixelated::{Callbacks, Context};
 use winit::event::MouseButton;
 use winit::event::VirtualKeyCode as KeyCode;
 
@@ -131,5 +131,5 @@ fn main() {
     println!("Space: to advance");
     println!("LMB: to place");
     println!("RMB: to remove");
-    pixel_renderer::run(app)
+    pixelated::run(app)
 }

@@ -1,7 +1,13 @@
 [package]
-name = "pixel-renderer"
+name = "pixelated"
 version = "0.1.0"
 edition = "2021"
+description = "A small opinionated pixel renderer focusing on simplicity."
+homepage = "https://github.com/stofffe/pixelated"
+repository = "https://github.com/stofffe/pixelated"
+documentation = "https://github.com/stofffe/pixelated"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

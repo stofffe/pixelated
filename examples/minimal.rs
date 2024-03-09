@@ -1,4 +1,4 @@
-use pixel_renderer::{canvas, input, media, window, Callbacks, Context};
+use pixelated::{canvas, input, media, window, Callbacks, Context};
 
 const WIDTH: u32 = 256;
 const HEIGHT: u32 = 256;
@@ -35,5 +35,5 @@ impl Callbacks for Game {
 fn main() {
     let app = Game {};
     println!("S: to screenshot");
-    pixel_renderer::run(app);
+    pixelated::run(app);
 }
