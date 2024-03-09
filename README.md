@@ -42,7 +42,7 @@ fn main() {
 }
 ```
 
-Output
+Output  
 ![Example](./examples/outputs/minimal.png)
 
 More examples can be seen in [examples](https://github.com/stofffe/pixelated/tree/main/examples).
