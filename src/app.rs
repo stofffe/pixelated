@@ -48,7 +48,8 @@ where
 }
 
 /// Runs the event loop
-/// Calls back to user defined functions thorugh Callback trait
+///
+/// Calls user defined functions thorugh Callback trait
 pub fn run<C: Callbacks + 'static>(callbacks: C)
 where
     C: Callbacks + 'static,
