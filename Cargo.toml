@@ -10,6 +10,7 @@ categories = ["pixels", "graphics", "rendering"]
 keywords = ["pixels", "graphics"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
+exclude = ["examples/", ".git/"]
 
 [dependencies]
 pollster = "0.2"
