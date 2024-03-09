@@ -63,7 +63,6 @@ where
     pollster::block_on(window::run_window(event_loop, app, ctx));
 }
 
-// TODO contex builder?
 async fn build_context() -> (Context, EventLoop<()>) {
     let (window, event_loop) = window::new_window();
 

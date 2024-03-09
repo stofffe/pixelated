@@ -62,7 +62,6 @@ impl GifUploader {
     }
 
     /// Export the current frames to a file at specified path
-    // TODO need to be mut
     pub(crate) fn export_to_gif(&mut self, path: &str) {
         let file = File::create(path).expect("could not create file");
         let mut encoder = Encoder::new(&file, self.width as u16, self.height as u16, &[])
