@@ -45,7 +45,7 @@ impl Canvas {
 
     /// Get pixel data for a coordianate
     /// Panics if trying to access outside canvas
-    pub(crate) fn get_pixel(&self, x: u32, y: u32) -> [u8; 3] {
+    pub(crate) fn pixel_rgb(&self, x: u32, y: u32) -> [u8; 3] {
         assert_pixel(x, y, self.width, self.height);
 
         let index = (y * 4 * self.width + x * 4) as usize;
@@ -58,7 +58,20 @@ impl Canvas {
 
     /// Get pixel data for a coordianate
     /// Panics if trying to access outside canvas
-    pub(crate) fn get_pixel_alpha(&self, x: u32, y: u32) -> [u8; 4] {
+    pub(crate) fn pixel_rgb_f32(&self, x: u32, y: u32) -> [f32; 3] {
+        assert_pixel(x, y, self.width, self.height);
+
+        let index = (y * 4 * self.width + x * 4) as usize;
+        [
+            self.pixels[index] as f32 / 255.0,
+            self.pixels[index + 1] as f32 / 255.0,
+            self.pixels[index + 2] as f32 / 255.0,
+        ]
+    }
+
+    /// Get pixel data for a coordianate
+    /// Panics if trying to access outside canvas
+    pub(crate) fn pixel_rgba(&self, x: u32, y: u32) -> [u8; 4] {
         assert_pixel(x, y, self.width, self.height);
 
         let index = (y * 4 * self.width + x * 4) as usize;
@@ -67,6 +80,20 @@ impl Canvas {
             self.pixels[index + 1],
             self.pixels[index + 2],
             self.pixels[index + 3],
+        ]
+    }
+
+    /// Get pixel data for a coordianate
+    /// Panics if trying to access outside canvas
+    pub(crate) fn pixel_rgba_f32(&self, x: u32, y: u32) -> [f32; 4] {
+        assert_pixel(x, y, self.width, self.height);
+
+        let index = (y * 4 * self.width + x * 4) as usize;
+        [
+            self.pixels[index] as f32 / 255.0,
+            self.pixels[index + 1] as f32 / 255.0,
+            self.pixels[index + 2] as f32 / 255.0,
+            self.pixels[index + 3] as f32 / 255.0,
         ]
     }
 
@@ -105,7 +132,7 @@ impl Canvas {
 
         // Alpha blending where a is over b
         // https://en.wikipedia.org/wiki/Alpha_compositing
-        let prev_color = self.get_pixel_alpha(x, y);
+        let prev_color = self.pixel_rgba(x, y);
         let a = &[
             color[0] as f32 / 255.0,
             color[1] as f32 / 255.0,
@@ -284,7 +311,16 @@ pub fn write_pixel_rgba_f32(ctx: &mut Context, x: u32, y: u32, color: &[f32; 4])
 ///
 /// Panics if trying to access outside canvas
 pub fn pixel_rgb(ctx: &Context, x: u32, y: u32) -> [u8; 3] {
-    ctx.render.canvas.get_pixel(x, y)
+    ctx.render.canvas.pixel_rgb(x, y)
+}
+
+/// Color at pixel (x, y)
+///
+/// Color: RGB \[0,1\]
+///
+/// Panics if trying to access outside canvas
+pub fn pixel_rgb_f32(ctx: &Context, x: u32, y: u32) -> [f32; 3] {
+    ctx.render.canvas.pixel_rgb_f32(x, y)
 }
 
 /// Color at pixel (x, y)
@@ -293,7 +329,16 @@ pub fn pixel_rgb(ctx: &Context, x: u32, y: u32) -> [u8; 3] {
 ///
 /// Panics if trying to access outside canvas
 pub fn pixel_rgba(ctx: &Context, x: u32, y: u32) -> [u8; 4] {
-    ctx.render.canvas.get_pixel_alpha(x, y)
+    ctx.render.canvas.pixel_rgba(x, y)
+}
+
+/// Color at pixel (x, y)
+///
+/// Color: RGBA \[0,1\]
+///
+/// Panics if trying to access outside canvas
+pub fn pixel_rgba_f32(ctx: &Context, x: u32, y: u32) -> [f32; 4] {
+    ctx.render.canvas.pixel_rgba_f32(x, y)
 }
 
 /// Resizes the canvas
@@ -344,7 +389,7 @@ mod tests {
     #[should_panic]
     fn test_get_outside_canvas_panics() {
         let canvas = Canvas::new(256, 256);
-        canvas.get_pixel(256, 10);
+        canvas.pixel_rgb(256, 10);
     }
 
     #[test]
@@ -367,7 +412,7 @@ mod tests {
         let mut canvas = Canvas::new(256, 256);
         canvas.write_pixel(11, 10, &color);
 
-        let output = canvas.get_pixel(11, 10);
+        let output = canvas.pixel_rgb(11, 10);
 
         assert_eq!(color, output);
     }
@@ -376,11 +421,11 @@ mod tests {
     fn test_resize() {
         let mut canvas = Canvas::new(256, 256);
         canvas.write_pixel(255, 200, &[255, 255, 255]);
-        canvas.get_pixel(255, 200);
+        canvas.pixel_rgb(255, 200);
 
         canvas.resize(512, 512);
         canvas.write_pixel(500, 230, &[255, 255, 255]);
-        canvas.get_pixel(500, 230);
+        canvas.pixel_rgb(500, 230);
     }
 }
 
