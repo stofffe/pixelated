@@ -6,7 +6,7 @@ Features
 
 - Pixel renderer
 - Keyboard and mouse input
-- Ability to screenshot and create gifs
+- Ability to screenshot
 
 ### Minimal example
 

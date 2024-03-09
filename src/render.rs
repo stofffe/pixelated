@@ -1,6 +1,6 @@
 use crate::{
     canvas::{Canvas, DEFAULT_CANVAS_HEIGHT, DEFAULT_CANVAS_WIDTH},
-    media::{GifUploader, ScreenshotUploader},
+    media::ScreenshotUploader,
 };
 use wgpu::{util::DeviceExt, Adapter, Device, PresentMode, Surface, SurfaceConfiguration};
 use winit::window::Window;
@@ -17,7 +17,6 @@ pub struct RenderContext {
     pub(crate) canvas: Canvas,
 
     pub(crate) screenshot_uploader: ScreenshotUploader,
-    pub(crate) gif_uploader: GifUploader,
 
     pub(crate) vertex_buffer: wgpu::Buffer,
     pub(crate) index_buffer: wgpu::Buffer,
@@ -88,7 +87,6 @@ impl RenderContext {
         let canvas = Canvas::new(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
         let screenshot_uploader =
             ScreenshotUploader::new(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
-        let gif_uploader = GifUploader::new(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
 
         Self {
             window,
@@ -104,7 +102,6 @@ impl RenderContext {
             texture,
             canvas,
             screenshot_uploader,
-            gif_uploader,
         }
     }
 

@@ -1,9 +1,7 @@
-// Upload screenshots and gifs
+// Upload screenshots
 
 use crate::Context;
-use gif::{Encoder, Frame, Repeat};
 use image::{ImageResult, RgbaImage};
-use std::fs::File;
 
 /// Can take screenshots of a canvas
 pub(crate) struct ScreenshotUploader {
@@ -32,61 +30,6 @@ impl ScreenshotUploader {
     }
 }
 
-/// Can record gif of canvas frames
-#[derive(Default)]
-pub(crate) struct GifUploader {
-    frames: Vec<Vec<u8>>,
-    width: u32,
-    height: u32,
-}
-
-impl GifUploader {
-    /// Create GifUploader with specific width and height
-    /// frame_skip specifies how many frames to step by when exporting to gif
-    pub(crate) fn new(width: u32, height: u32) -> Self {
-        Self {
-            width,
-            height,
-            frames: Vec::default(),
-        }
-    }
-
-    pub(crate) fn resize(&mut self, width: u32, height: u32) {
-        self.width = width;
-        self.height = height;
-    }
-
-    /// Record the current canvas into a frame
-    pub(crate) fn record(&mut self, pixels: Vec<u8>) {
-        self.frames.push(pixels);
-    }
-
-    /// Export the current frames to a file at specified path
-    pub(crate) fn export_to_gif(&mut self, path: &str) {
-        let file = File::create(path).expect("could not create file");
-        let mut encoder = Encoder::new(&file, self.width as u16, self.height as u16, &[])
-            .expect("could nt create gif encoder");
-
-        encoder.set_repeat(Repeat::Infinite).unwrap();
-
-        for frame in self.frames.iter_mut() {
-            let mut rgba = RgbaImage::new(self.width, self.height);
-            rgba.copy_from_slice(frame);
-
-            let mut gif_frame = Frame::from_rgba(self.width as u16, self.height as u16, frame);
-            gif_frame.delay = 1;
-            encoder
-                .write_frame(&gif_frame)
-                .expect("could not write gif frame");
-        }
-    }
-
-    /// Clear current frames
-    pub(crate) fn clear(&mut self) {
-        self.frames.clear();
-    }
-}
-
 //
 // Commands
 //
@@ -96,21 +39,4 @@ pub fn export_screenshot(ctx: &Context, path: &str) -> ImageResult<()> {
     ctx.render
         .screenshot_uploader
         .export_to_file(&ctx.render.canvas.pixels, path)
-}
-
-/// Record the current canvas as a frame to the gif buffer
-pub fn record_gif_frame(ctx: &mut Context) {
-    ctx.render
-        .gif_uploader
-        .record(ctx.render.canvas.pixels.clone());
-}
-
-/// Export the currently recorded frames to the desired location
-pub fn export_gif(ctx: &mut Context, path: &str) {
-    ctx.render.gif_uploader.export_to_gif(path);
-}
-
-/// Clear the currently recorded frames
-pub fn clear_gif_frames(ctx: &mut Context) {
-    ctx.render.gif_uploader.clear();
 }
