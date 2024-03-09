@@ -3,6 +3,7 @@
 Small opinionated game engine focusing on simplicity.
 
 Features
+
 - Pixel renderer
 - Keyboard and mouse input
 - Ability to screenshot and create gifs
@@ -16,6 +17,10 @@ const HEIGHT: u32 = 256;
 struct Game {}
 
 impl Callbacks for Game {
+    fn init(&self, ctx: &mut Context) {
+        canvas::resize(ctx, WIDTH, HEIGHT);
+    }
+
     fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
         canvas::clear_screen(ctx);
 
@@ -23,30 +28,24 @@ impl Callbacks for Game {
         let (wx, wy) = (100, 100);
         for y in 0..wx {
             for x in 0..wy {
-                canvas::write_pixel(ctx, x + px, y + py, &[0, 255, 255]);
+                canvas::write_pixel_rgb(ctx, x + px, y + py, &[0, 255, 255]);
             }
         }
 
-        // Return true to exit
         false
-    }
-
-    fn init(&self, ctx: &mut Context) {
-        canvas::resize(ctx, WIDTH, HEIGHT);
     }
 }
 
 fn main() {
     let app = Game {};
-    pixel_renderer::app::run(app)
+    pixel_renderer::run(app);
 }
-
 ```
 
-Output  
+Output
 ![Example](./examples/outputs/minimal.png)
 
-More examples can be seen in [examples](https://github.com/stofffe/pixel-renderer/tree/main/examples). 
+More examples can be seen in [examples](https://github.com/stofffe/pixel-renderer/tree/main/examples).
 
 ### Projects using pixel-renderer
 

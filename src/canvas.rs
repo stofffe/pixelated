@@ -183,11 +183,6 @@ impl Canvas {
             pixel[3] = self.clear_color[3];
         }
     }
-
-    /// Get canvas capacity
-    pub(crate) fn capacity(&self) -> u32 {
-        self.width * self.height * 4
-    }
 }
 
 /// Asserts a pixel is inside the screen
@@ -232,57 +227,78 @@ fn assert_rgba(color: &[f32; 4]) {
 }
 
 // Commands
-pub fn scale_to_window(ctx: &mut Context) {
-    let size = ctx.render.window.inner_size();
-    resize(ctx, size.width, size.height);
-}
 
-/// Gets raw reference to the pixel array
-/// Stored as list of u8 chunks of 4 (rgba)
-pub fn pixel_ref(ctx: &mut Context) -> &mut Vec<u8> {
+/// Mutable reference to pixel array
+///
+/// Stored as list of u8, chunks of 4 represent RGBA
+pub fn pixels_ref(ctx: &mut Context) -> &mut Vec<u8> {
     &mut ctx.render.canvas.pixels
 }
 
-/// Write pixel data to a coordinate (r,g,b,a)
-/// Overwrites previous pixel
-pub fn write_pixel(ctx: &mut Context, x: u32, y: u32, color: &[u8; 3]) {
+/// Copy of pixel buffer
+///
+/// Stored as list of u8, chunks of 4 represent RGBA
+pub fn pixels_copy(ctx: &Context) -> Vec<u8> {
+    ctx.render.canvas.get_pixel_buffer()
+}
+
+/// Write color to pixel at (x, y)
+///
+/// Color: Full opacity RGB \[0,255\]
+///
+/// Panics if trying to write outside canvas
+pub fn write_pixel_rgb(ctx: &mut Context, x: u32, y: u32, color: &[u8; 3]) {
     ctx.render.canvas.write_pixel(x, y, color);
 }
 
-/// Write pixel data to a coordinate (r,g,b,a)
+/// Write color to pixel at (x, y)
+///
+/// Color: Full opacity RGB \[0,1\]
+///
 /// Panics if trying to write outside canvas
-/// RGBA must be in range [0,1]
-pub fn write_pixel_f32(ctx: &mut Context, x: u32, y: u32, color: &[f32; 3]) {
+pub fn write_pixel_rgb_f32(ctx: &mut Context, x: u32, y: u32, color: &[f32; 3]) {
     ctx.render.canvas.write_pixel_f32(x, y, color);
 }
 
-/// Write pixel data to a coordinate (r,g,b,a)
-/// Non premultiplied alpha blending
-pub fn write_pixel_blend(ctx: &mut Context, x: u32, y: u32, color: &[u8; 4]) {
+/// Write color to pixel at (x, y)
+///
+/// Color: Non premultiplied RGBA \[0,255\]
+///
+/// Panics if trying to write outside canvas
+pub fn write_pixel_rgba(ctx: &mut Context, x: u32, y: u32, color: &[u8; 4]) {
     ctx.render.canvas.write_pixel_blend(x, y, color);
 }
 
-/// Write pixel data to a coordinate (r,g,b,a)
-/// Non premultiplied alpha blending
-/// RGBA must be in range [0,1]
-pub fn write_pixel_blend_f32(ctx: &mut Context, x: u32, y: u32, color: &[f32; 4]) {
+/// Write color to pixel at (x, y)
+///
+/// Color: Non premultiplied RGBA \[0,1\]
+///
+/// Panics if trying to write outside canvas
+pub fn write_pixel_rgba_f32(ctx: &mut Context, x: u32, y: u32, color: &[f32; 4]) {
     ctx.render.canvas.write_pixel_blend_f32(x, y, color);
 }
 
-/// Get pixel data for a coordianate
+/// Color at pixel (x, y)
+///
+/// Color: RGB \[0,255\]
+///
 /// Panics if trying to access outside canvas
-pub fn get_pixel(ctx: &Context, x: u32, y: u32) -> [u8; 3] {
+pub fn pixel_rgb(ctx: &Context, x: u32, y: u32) -> [u8; 3] {
     ctx.render.canvas.get_pixel(x, y)
 }
 
-/// Get pixel data for a coordianate
+/// Color at pixel (x, y)
+///
+/// Color: RGBA \[0,255\]
+///
 /// Panics if trying to access outside canvas
-pub fn get_pixel_alpha(ctx: &Context, x: u32, y: u32) -> [u8; 4] {
+pub fn pixel_rgba(ctx: &Context, x: u32, y: u32) -> [u8; 4] {
     ctx.render.canvas.get_pixel_alpha(x, y)
 }
 
-/// Resizes the canvas and the media uploaders
-/// Clears screen to ```clear_color```
+/// Resizes the canvas
+///
+/// Clears screen to clear color
 pub fn resize(ctx: &mut Context, width: u32, height: u32) {
     ctx.render.canvas.resize(width, height);
     ctx.render.screenshot_uploader.resize(width, height);
@@ -290,40 +306,33 @@ pub fn resize(ctx: &mut Context, width: u32, height: u32) {
     ctx.render.resize_canvas_texture(width, height);
 }
 
-/// Set canvas clear color (r,g,b,a)
+/// Set canvas clear color
+///
+/// Color: RGB \[0,255\]
 pub fn set_clear_color(ctx: &mut Context, color: &[u8; 3]) {
     ctx.render.canvas.set_clear_color(color);
 }
 
-/// Set canvas clear color (r,g,b)
-/// Values must lie in range [0,1]
+/// Set canvas clear color
+///
+/// Color: RGB \[0,1\]
 pub fn set_clear_color_f32(ctx: &mut Context, color: &[f32; 3]) {
     ctx.render.canvas.set_clear_color_f32(color);
 }
 
-/// Clears all pixels in canvas to clear color
+/// Clears all pixels to clear color
 pub fn clear_screen(ctx: &mut Context) {
     ctx.render.canvas.clear_screen();
 }
 
-/// Get canvas capacity
-pub fn capacity(ctx: &Context) -> u32 {
-    ctx.render.canvas.capacity()
-}
-
-/// Get canvas width
+/// Canvas width
 pub fn width(ctx: &Context) -> u32 {
     ctx.render.canvas.width
 }
 
-/// Get canvas height
+/// Canvas height
 pub fn height(ctx: &Context) -> u32 {
     ctx.render.canvas.height
-}
-
-/// Get current pixel buffer
-pub fn pixel_buffer(ctx: &Context) -> Vec<u8> {
-    ctx.render.canvas.get_pixel_buffer()
 }
 
 // Tests

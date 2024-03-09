@@ -46,7 +46,7 @@ pub fn time_since_start(ctx: &Context) -> f32 {
     ctx.time.time_since_start()
 }
 
-/// Returns the current time at the start of the current frame
+/// Returns the current time at the start of the frame
 pub fn current_time(ctx: &Context) -> time::SystemTime {
     ctx.time.current_time
 }

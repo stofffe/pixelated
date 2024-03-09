@@ -18,7 +18,7 @@ impl Callbacks for Game {
         let (wx, wy) = (100, 100);
         for y in 0..wx {
             for x in 0..wy {
-                canvas::write_pixel(ctx, x + px, y + py, &[0, 255, 255]);
+                canvas::write_pixel_rgb(ctx, x + px, y + py, &[0, 255, 255]);
             }
         }
 

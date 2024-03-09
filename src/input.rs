@@ -118,7 +118,7 @@ pub fn mouse_delta(ctx: &Context) -> (f32, f32) {
     (dx as f32, dy as f32)
 }
 
-/// Returns if mouse is on screen or not
+/// Returns if mouse is on screen
 pub fn mouse_on_screen(ctx: &Context) -> bool {
     ctx.input.mouse.on_screen()
 }
@@ -133,18 +133,18 @@ pub fn mouse_pos_pixel(ctx: &Context) -> (u32, u32) {
     ctx.input.mouse.mouse_pos_pixel(&ctx.render)
 }
 
-/// Returns true if MouseButton is pressed
+/// Returns if MouseButton is pressed
 /// Accepts repeating
 pub fn mouse_button_pressed(ctx: &Context, keycode: MouseButton) -> bool {
     ctx.input.mouse.button_pressed(keycode)
 }
 
-/// Returns true if MouseButton was pressed this frame
+/// Returns if MouseButton was pressed this frame
 pub fn mouse_button_just_pressed(ctx: &Context, keycode: MouseButton) -> bool {
     ctx.input.mouse.button_just_pressed(keycode)
 }
 
-/// Returns true if MouseButton was released this frame
+/// Returns if MouseButton was released this frame
 pub fn mouse_button_released(ctx: &Context, keycode: MouseButton) -> bool {
     ctx.input.mouse.button_released(keycode)
 }
@@ -163,6 +163,7 @@ pub(crate) struct KeyboardContext {
     previous_pressed_modifiers: HashSet<KeyModifier>,
 }
 
+/// Describes key modifiers
 #[derive(Debug, Hash, Ord, PartialOrd, PartialEq, Eq, Clone, Copy)]
 pub enum KeyModifier {
     Shift,
@@ -173,19 +174,19 @@ pub enum KeyModifier {
 
 // Getting keys
 impl KeyboardContext {
-    /// Returns true if KeyCode is down
+    /// Returns if KeyCode is down
     /// Accepts repeating
     fn key_pressed(&self, keycode: KeyCode) -> bool {
         self.pressed.contains(&keycode)
     }
 
-    /// Returns true if KeyCode was pressed this frame
+    /// Returns if KeyCode was pressed this frame
     /// Does not accepts repeating
     fn key_just_pressed(&self, keycode: KeyCode) -> bool {
         self.pressed.contains(&keycode) && !self.previous_pressed.contains(&keycode)
     }
 
-    /// Returns true is KeyCode was released this frame
+    /// Returns is KeyCode was released this frame
     fn key_released(&self, keycode: KeyCode) -> bool {
         !self.pressed.contains(&keycode) && self.previous_pressed.contains(&keycode)
     }
@@ -249,34 +250,36 @@ impl KeyboardContext {
 // Keyboard commands
 //
 
-/// Returns true if KeyCode is pressed
+/// Returns if KeyCode is pressed
+///
 /// Accepts repeating
 pub fn key_pressed(ctx: &Context, keycode: KeyCode) -> bool {
     ctx.input.keyboard.key_pressed(keycode)
 }
 
-/// Returns true if KeyCode was pressed this frame
+/// Returns if KeyCode was pressed this frame
 pub fn key_just_pressed(ctx: &Context, keycode: KeyCode) -> bool {
     ctx.input.keyboard.key_just_pressed(keycode)
 }
 
-/// Returns true is KeyCode was released this frame
+/// Returns is KeyCode was released this frame
 pub fn key_released(ctx: &Context, keycode: KeyCode) -> bool {
     ctx.input.keyboard.key_released(keycode)
 }
 
-/// Returns true if KeyModifer is pressed
+/// Returns if KeyModifer is pressed
+///
 /// Accepts repeating
 pub fn modifier_pressed(ctx: &Context, key_modifier: KeyModifier) -> bool {
     ctx.input.keyboard.modifier_pressed(key_modifier)
 }
 
-/// Returns true if KeyModifer was pressed this frame
+/// Returns if KeyModifer was pressed this frame
 pub fn modifer_just_pressed(ctx: &Context, key_modifier: KeyModifier) -> bool {
     ctx.input.keyboard.modifier_just_pressed(key_modifier)
 }
 
-/// Returns true if KeyModifier was released this frame
+/// Returns if KeyModifier was released this frame
 pub fn modifer_released(ctx: &Context, key_modifier: KeyModifier) -> bool {
     ctx.input.keyboard.modifier_released(key_modifier)
 }

@@ -27,7 +27,7 @@ impl Callbacks for Game {
         let box_y = self.box_y as u32;
         for y in box_y..box_y + BOX_HEIGHT {
             for x in box_x..box_x + BOX_WIDTH {
-                canvas::write_pixel(ctx, x, y, &[0, 255, 255]);
+                canvas::write_pixel_rgb(ctx, x, y, &[0, 255, 255]);
             }
         }
 

@@ -14,21 +14,21 @@ impl Callbacks for Game {
         // Write
         for y in 25..125 {
             for x in 125..225 {
-                canvas::write_pixel_blend(ctx, x, y, &[255, 0, 0, 255 / 2]);
+                canvas::write_pixel_rgba(ctx, x, y, &[255, 0, 0, 255 / 2]);
             }
         }
 
         // Write opaque green pixel
         for y in 50..150 {
             for x in 50..150 {
-                canvas::write_pixel_blend(ctx, x, y, &[0, 255, 0, 255 / 2]);
+                canvas::write_pixel_rgba(ctx, x, y, &[0, 255, 0, 255 / 2]);
             }
         }
 
         // Write aplha blue pixel
         for y in 100..200 {
             for x in 100..200 {
-                canvas::write_pixel_blend(ctx, x, y, &[0, 0, 255, 255 / 2]);
+                canvas::write_pixel_rgba(ctx, x, y, &[0, 0, 255, 255 / 2]);
             }
         }
 

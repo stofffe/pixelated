@@ -111,7 +111,7 @@ pub fn export_gif(ctx: &mut Context, path: &str) {
     ctx.render.gif_uploader.export_to_gif(path);
 }
 
-/// Clear the currently recorded canvas frames
+/// Clear the currently recorded frames
 pub fn clear_gif_frames(ctx: &mut Context) {
     ctx.render.gif_uploader.clear();
 }

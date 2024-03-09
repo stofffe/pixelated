@@ -99,7 +99,7 @@ pub(crate) async fn run_window<C: Callbacks + 'static>(
 // Commands
 //
 
-/// Enables/Disables vsync
+/// Enable/Disable vsync
 pub fn set_vsync(ctx: &mut Context, vsync: bool) {
     let present_mode = if vsync {
         wgpu::PresentMode::AutoVsync
@@ -109,7 +109,7 @@ pub fn set_vsync(ctx: &mut Context, vsync: bool) {
     ctx.render.reconfigure_present_mode(present_mode);
 }
 
-/// Enables/Disables borderless windowed mode
+/// Enable/Disable borderless windowed mode
 pub fn set_fullscreen(ctx: &mut Context, fullscreen: bool) {
     let fullscreen_mode = if fullscreen {
         Some(winit::window::Fullscreen::Borderless(None))
@@ -119,20 +119,21 @@ pub fn set_fullscreen(ctx: &mut Context, fullscreen: bool) {
     ctx.render.window.set_fullscreen(fullscreen_mode);
 }
 
-/// Enables/Disables window resizing
+/// Enable/Disable window resizing
 pub fn set_resizeable(ctx: &mut Context, resizable: bool) {
     ctx.render.window.set_resizable(resizable);
 }
 
-/// Sets the inner size of the window
+/// Set the inner size of the window
 pub fn set_size(ctx: &mut Context, size: (u32, u32)) {
     ctx.render
         .window
         .set_inner_size(winit::dpi::PhysicalSize::new(size.0, size.1));
 }
 
-/// Enables/Disables the cursor
-/// If disabled: Turns off cursor and locks cursor to middle of window
+/// Enable/Disable the cursor
+///
+/// If disabled: Turns off cursor graphics and locks cursor to middle of window
 pub fn set_cursor_enabled(ctx: &mut Context, enabled: bool) {
     // TODO handle error
     ctx.render.window.set_cursor_visible(enabled);

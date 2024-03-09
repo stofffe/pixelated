@@ -110,12 +110,12 @@ impl Callbacks for Conways {
         for y in 0..self.height {
             for x in 0..self.width {
                 if self.is_alive(x, y) {
-                    canvas::write_pixel(ctx, x, y, &[255, 255, 255]);
+                    canvas::write_pixel_rgb(ctx, x, y, &[255, 255, 255]);
                 }
             }
         }
         if input::mouse_on_screen(ctx) {
-            canvas::write_pixel_blend(ctx, mouse_pos.0, mouse_pos.1, &[255, 255, 255, 255 / 2]);
+            canvas::write_pixel_rgba(ctx, mouse_pos.0, mouse_pos.1, &[255, 255, 255, 255 / 2]);
         }
 
         false
