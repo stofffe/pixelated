@@ -1,6 +1,6 @@
 # Pixelated
 
-A small opinionated pixel renderer focusing on simplicity.
+An opinionated pixel renderer focusing on simplicity
 
 Features
 
