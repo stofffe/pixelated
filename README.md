@@ -11,6 +11,8 @@ Features
 ### Minimal example
 
 ```rust
+use pixelated::{canvas, Callbacks, Context};
+
 const WIDTH: u32 = 256;
 const HEIGHT: u32 = 256;
 
@@ -38,7 +40,7 @@ impl Callbacks for Game {
 
 fn main() {
     let app = Game {};
-    pixel_renderer::run(app);
+    pixelated::run(app);
 }
 ```
 
