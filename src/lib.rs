@@ -1,6 +1,7 @@
 pub mod canvas;
 pub mod input;
 pub mod media;
+pub mod prelude;
 pub mod time;
 pub mod window;
 
