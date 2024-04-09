@@ -1,5 +1,4 @@
 use pixelated::{canvas, input, media, Callbacks, Context};
-use winit::event::VirtualKeyCode as KeyCode;
 
 struct Game {}
 
@@ -11,7 +10,7 @@ impl Callbacks for Game {
         canvas::resize(ctx, WIDTH, HEIGHT);
     }
 
-    fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
+    fn update(&mut self, ctx: &mut Context) -> bool {
         canvas::set_clear_color(ctx, &[255, 255, 255]);
         canvas::clear_screen(ctx);
 
@@ -36,7 +35,7 @@ impl Callbacks for Game {
             }
         }
 
-        if input::key_just_pressed(ctx, KeyCode::S) {
+        if input::key_just_pressed(ctx, input::KeyCode::KeyS) {
             let path = "examples/outputs/alpha_blending.png";
             media::export_screenshot(ctx, path).unwrap();
             println!("saved screenshot to {}", path);

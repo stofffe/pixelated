@@ -13,7 +13,7 @@ pub trait Callbacks {
     /// Called once per frame before render
     /// Return value determines wether to exit game or not
     /// dt: Time since last frame in seconds
-    fn update(&mut self, _ctx: &mut Context, _dt: f32) -> bool {
+    fn update(&mut self, _ctx: &mut Context) -> bool {
         false
     }
 }
@@ -32,10 +32,11 @@ where
     /// Main loop which is called from window event loop
     /// Returns true if app should exit
     pub(crate) fn update(&mut self, ctx: &mut Context) -> bool {
-        let dt = ctx.time.update_time();
+        // Update time
+        ctx.time.update_time();
 
         // Update callback
-        if self.callbacks.update(ctx, dt) {
+        if self.callbacks.update(ctx) {
             return true;
         }
 

@@ -15,8 +15,8 @@ exclude = ["examples/", ".git/"]
 
 [dependencies]
 pollster = "0.2"
-winit = "0.27"
-wgpu = "0.15"
+winit = { version = "0.29.15", features = ["rwh_05", "rwh_06"] }
+wgpu = "0.19.3"
 bytemuck = { version = "1.13.1", features = ["derive"] }
 log = "0.4"
 env_logger = "0.10"

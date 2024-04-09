@@ -1,7 +1,6 @@
 use pixelated::{canvas, input};
 use pixelated::{Callbacks, Context};
 use winit::event::MouseButton;
-use winit::event::VirtualKeyCode as KeyCode;
 
 const WIDTH: u32 = 50;
 const HEIGHT: u32 = 50;
@@ -92,7 +91,7 @@ impl Callbacks for Conways {
         canvas::resize(ctx, WIDTH, HEIGHT);
     }
 
-    fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
+    fn update(&mut self, ctx: &mut Context) -> bool {
         let mouse_pos = input::mouse_pos_pixel(ctx);
 
         // Input and update
@@ -105,7 +104,7 @@ impl Callbacks for Conways {
             }
         }
 
-        if input::key_pressed(ctx, KeyCode::Space) {
+        if input::key_pressed(ctx, input::KeyCode::Space) {
             self.update();
         }
 

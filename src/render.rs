@@ -2,17 +2,18 @@ use crate::{
     canvas::{Canvas, DEFAULT_CANVAS_HEIGHT, DEFAULT_CANVAS_WIDTH},
     media::ScreenshotUploader,
 };
+use std::sync::Arc;
 use wgpu::{util::DeviceExt, Adapter, Device, PresentMode, Surface, SurfaceConfiguration};
 use winit::window::Window;
 
-pub struct RenderContext {
+pub(crate) struct RenderContext {
     #[allow(dead_code)]
     pub(crate) adapter: wgpu::Adapter,
     pub(crate) device: wgpu::Device,
     pub(crate) queue: wgpu::Queue,
-    pub(crate) surface: wgpu::Surface,
+    pub(crate) surface: wgpu::Surface<'static>,
     pub(crate) surface_config: wgpu::SurfaceConfiguration,
-    pub(crate) window: Window,
+    pub(crate) window: Arc<Window>,
 
     pub(crate) canvas: Canvas,
 
@@ -33,9 +34,14 @@ impl RenderContext {
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
             dx12_shader_compiler: Default::default(),
+            flags: wgpu::InstanceFlags::default(),
+            gles_minor_version: wgpu::Gles3MinorVersion::default(),
         });
-        let surface =
-            unsafe { instance.create_surface(&window) }.expect("could not create surface");
+
+        let window = Arc::new(window);
+        let surface = instance
+            .create_surface(window.clone())
+            .expect("could not create surface");
 
         // Create adapter. device and queue
         let adapter = instance
@@ -49,8 +55,8 @@ impl RenderContext {
         let (device, queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
-                    features: wgpu::Features::empty(),
-                    limits: wgpu::Limits::default(),
+                    required_features: wgpu::Features::empty(),
+                    required_limits: wgpu::Limits::default(),
                     label: None,
                 },
                 None, // Trace path
@@ -113,7 +119,7 @@ impl RenderContext {
         self.texture_bind_group = bind_group;
     }
 
-    pub(crate) fn reconfigure_present_mode(&mut self, present_mode: PresentMode) {
+    pub(crate) fn reconfigure_present_mode(&mut self, present_mode: wgpu::PresentMode) {
         self.surface_config.present_mode = present_mode;
         self.surface.configure(&self.device, &self.surface_config);
     }
@@ -138,8 +144,8 @@ impl RenderContext {
             self.canvas.pixels.as_slice(),
             wgpu::ImageDataLayout {
                 offset: 0,
-                bytes_per_row: std::num::NonZeroU32::new(4 * self.canvas.width),
-                rows_per_image: std::num::NonZeroU32::new(self.canvas.height),
+                bytes_per_row: Some(4 * self.canvas.width),
+                rows_per_image: Some(self.canvas.height),
             },
             self.texture.size(),
         );
@@ -167,10 +173,12 @@ impl RenderContext {
                             b: 0.3,
                             a: 1.0,
                         }),
-                        store: true,
+                        store: wgpu::StoreOp::Store,
                     },
                 })],
                 depth_stencil_attachment: None,
+                timestamp_writes: None,
+                occlusion_query_set: None,
             });
             render_pass.set_pipeline(&self.render_pipeline);
             render_pass.set_bind_group(0, &self.texture_bind_group, &[]);
@@ -198,7 +206,7 @@ fn create_surface_config(
         .formats
         .iter()
         .copied()
-        .find(|f| f.describe().srgb)
+        .find(|f| f.is_srgb())
         .unwrap_or(surface_caps.formats[0]);
     wgpu::SurfaceConfiguration {
         usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
@@ -209,6 +217,7 @@ fn create_surface_config(
         present_mode,
         alpha_mode: surface_caps.alpha_modes[0],
         view_formats: vec![],
+        desired_maximum_frame_latency: 2,
     }
 }
 

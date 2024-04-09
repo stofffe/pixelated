@@ -8,10 +8,10 @@ struct Game {}
 impl Callbacks for Game {
     fn init(&self, ctx: &mut Context) {
         canvas::resize(ctx, WIDTH, HEIGHT);
-        window::set_resizeable(ctx, true);
+        window::window(ctx).set_resizable(true);
     }
 
-    fn update(&mut self, ctx: &mut Context, _dt: f32) -> bool {
+    fn update(&mut self, ctx: &mut Context) -> bool {
         canvas::clear_screen(ctx);
 
         let (px, py) = (75, 75);
@@ -22,7 +22,7 @@ impl Callbacks for Game {
             }
         }
 
-        if input::key_just_pressed(ctx, input::KeyCode::S) {
+        if input::key_just_pressed(ctx, input::KeyCode::KeyS) {
             let path = "examples/outputs/minimal.png";
             media::export_screenshot(ctx, path).unwrap();
             println!("saved screenshot to {}", path);

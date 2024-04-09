@@ -1,9 +1,9 @@
+use winit::event::Modifiers;
 pub use winit::event::MouseButton;
-pub use winit::event::VirtualKeyCode as KeyCode;
+pub use winit::keyboard::KeyCode;
 
 use crate::{render::RenderContext, Context};
 use std::collections::HashSet;
-use winit::event::ModifiersState;
 
 #[derive(Default)]
 pub(crate) struct InputContext {
@@ -169,7 +169,7 @@ pub enum KeyModifier {
     Shift,
     Ctrl,
     Alt,
-    Logo,
+    Super,
 }
 
 // Getting keys
@@ -217,19 +217,20 @@ impl KeyboardContext {
         self.pressed.remove(&keycode);
     }
 
-    pub fn modifiers_changed(&mut self, state: ModifiersState) {
+    pub fn modifiers_changed(&mut self, state: &Modifiers) {
         self.pressed_modifiers.clear();
-        if state.shift() {
+
+        if state.state().shift_key() {
             self.pressed_modifiers.insert(KeyModifier::Shift);
         }
-        if state.ctrl() {
-            self.pressed_modifiers.insert(KeyModifier::Ctrl);
-        }
-        if state.alt() {
+        if state.state().alt_key() {
             self.pressed_modifiers.insert(KeyModifier::Alt);
         }
-        if state.logo() {
-            self.pressed_modifiers.insert(KeyModifier::Logo);
+        if state.state().control_key() {
+            self.pressed_modifiers.insert(KeyModifier::Ctrl);
+        }
+        if state.state().super_key() {
+            self.pressed_modifiers.insert(KeyModifier::Super);
         }
     }
 
@@ -286,7 +287,8 @@ pub fn modifer_released(ctx: &Context, key_modifier: KeyModifier) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use winit::event::ModifiersState;
+    use winit::event::Modifiers;
+    use winit::keyboard::ModifiersState;
 
     use crate::input::KeyCode;
     use crate::input::KeyModifier;
@@ -296,48 +298,48 @@ mod tests {
     fn key_pressed_test() {
         let mut kc = KeyboardContext::default();
 
-        kc.set_key(KeyCode::A);
+        kc.set_key(KeyCode::KeyA);
 
-        assert!(kc.key_pressed(KeyCode::A));
-        assert!(!kc.key_pressed(KeyCode::B));
-
-        kc.save_keys();
-        kc.set_key(KeyCode::B);
-
-        assert!(kc.key_pressed(KeyCode::A));
-        assert!(kc.key_pressed(KeyCode::B));
+        assert!(kc.key_pressed(KeyCode::KeyA));
+        assert!(!kc.key_pressed(KeyCode::KeyB));
 
         kc.save_keys();
-        kc.release_key(KeyCode::A);
+        kc.set_key(KeyCode::KeyB);
 
-        assert!(!kc.key_pressed(KeyCode::A));
-        assert!(kc.key_pressed(KeyCode::B));
+        assert!(kc.key_pressed(KeyCode::KeyA));
+        assert!(kc.key_pressed(KeyCode::KeyB));
+
+        kc.save_keys();
+        kc.release_key(KeyCode::KeyA);
+
+        assert!(!kc.key_pressed(KeyCode::KeyA));
+        assert!(kc.key_pressed(KeyCode::KeyB));
     }
 
     #[test]
     fn key_just_pressed_test() {
         let mut kc = KeyboardContext::default();
-        kc.set_key(KeyCode::A);
+        kc.set_key(KeyCode::KeyA);
 
-        assert!(kc.key_just_pressed(KeyCode::A));
+        assert!(kc.key_just_pressed(KeyCode::KeyA));
 
         kc.save_keys();
-        kc.set_key(KeyCode::A);
+        kc.set_key(KeyCode::KeyA);
 
-        assert!(!kc.key_just_pressed(KeyCode::A));
+        assert!(!kc.key_just_pressed(KeyCode::KeyA));
     }
 
     #[test]
     fn key_released_test() {
         let mut kc = KeyboardContext::default();
-        kc.set_key(KeyCode::A);
+        kc.set_key(KeyCode::KeyA);
 
-        assert!(!kc.key_released(KeyCode::A));
+        assert!(!kc.key_released(KeyCode::KeyA));
 
         kc.save_keys();
-        kc.release_key(KeyCode::A);
+        kc.release_key(KeyCode::KeyA);
 
-        assert!(kc.key_released(KeyCode::A));
+        assert!(kc.key_released(KeyCode::KeyA));
     }
 
     #[test]
@@ -345,7 +347,7 @@ mod tests {
         let mut kc = KeyboardContext::default();
 
         // Press Shift
-        kc.modifiers_changed(ModifiersState::SHIFT);
+        kc.modifiers_changed(&Modifiers::from(ModifiersState::SHIFT));
 
         assert!(kc.modifier_pressed(KeyModifier::Shift));
         assert!(!kc.modifier_pressed(KeyModifier::Ctrl));
@@ -353,7 +355,9 @@ mod tests {
         kc.save_modifiers();
 
         // Press Shift and Ctrl
-        kc.modifiers_changed(ModifiersState::SHIFT | ModifiersState::CTRL);
+        kc.modifiers_changed(&Modifiers::from(
+            ModifiersState::SHIFT | ModifiersState::CONTROL,
+        ));
 
         assert!(kc.modifier_pressed(KeyModifier::Shift));
         assert!(kc.modifier_pressed(KeyModifier::Ctrl));
@@ -361,7 +365,7 @@ mod tests {
         kc.save_modifiers();
 
         // Release Shift
-        kc.modifiers_changed(ModifiersState::CTRL);
+        kc.modifiers_changed(&Modifiers::from(ModifiersState::CONTROL));
 
         assert!(!kc.modifier_pressed(KeyModifier::Shift));
         assert!(kc.modifier_pressed(KeyModifier::Ctrl));
@@ -371,14 +375,14 @@ mod tests {
     fn modifier_just_pressed_test() {
         let mut kc = KeyboardContext::default();
         // Press shift
-        kc.modifiers_changed(ModifiersState::SHIFT);
+        kc.modifiers_changed(&Modifiers::from(ModifiersState::SHIFT));
 
         assert!(kc.modifier_just_pressed(KeyModifier::Shift));
 
         kc.save_modifiers();
 
         // Release shift
-        kc.modifiers_changed(ModifiersState::from_bits(0).unwrap());
+        kc.modifiers_changed(&Modifiers::from(ModifiersState::empty()));
 
         assert!(!kc.modifier_just_pressed(KeyModifier::Shift));
     }
@@ -388,7 +392,7 @@ mod tests {
         let mut kc = KeyboardContext::default();
 
         // Press shift
-        kc.modifiers_changed(ModifiersState::SHIFT);
+        kc.modifiers_changed(&Modifiers::from(ModifiersState::SHIFT));
 
         assert!(!kc.modifier_released(KeyModifier::Shift));
         assert!(!kc.modifier_released(KeyModifier::Ctrl));
@@ -396,214 +400,9 @@ mod tests {
         kc.save_modifiers();
 
         // Release shift
-        kc.modifiers_changed(ModifiersState::from_bits(0).unwrap());
+        kc.modifiers_changed(&Modifiers::from(ModifiersState::empty()));
 
         assert!(kc.modifier_released(KeyModifier::Shift));
         assert!(!kc.modifier_released(KeyModifier::Ctrl));
     }
 }
-// use winit::event::MouseButton;
-// pub use winit::event::VirtualKeyCode as KeyCode;
-//
-// use std::collections::HashSet;
-//
-// use crate::render::RenderContext;
-//
-// #[derive(Default)]
-// pub struct InputContext {
-//     pub keyboard: KeyboardContext,
-//     pub mouse: MouseContext,
-// }
-//
-// #[derive(Default)]
-// pub struct MouseContext {
-//     on_screen: bool,
-//     pos: (f64, f64),
-//     delta: (f64, f64),
-//     pressed: HashSet<MouseButton>,
-//     previous_pressed: HashSet<MouseButton>,
-// }
-//
-// impl MouseContext {
-//     /// Returns if mouse is on screen or not
-//     pub fn on_screen(&self) -> bool {
-//         self.on_screen
-//     }
-//
-//     /// Returns the current physical coordinates for the mouse
-//     pub fn last_physical_pos(&self) -> (f64, f64) {
-//         self.pos
-//     }
-//
-//     /// Returns the current pixel under the mouse
-//     pub fn last_pixel_pos(&self, ctx: &RenderContext) -> (u32, u32) {
-//         // When holding the mouse button down pos can get bigger than physical size
-//         // So clamp to avoid out of bounds
-//         let relative_x = self.pos.0 / ctx.window_size.width as f64;
-//         let relative_y = self.pos.1 / ctx.window_size.height as f64;
-//         let pixel_x = relative_x * ctx.canvas.width as f64;
-//         let pixel_y = relative_y * ctx.canvas.height as f64;
-//         (pixel_x as u32, pixel_y as u32)
-//     }
-//
-//     /// Returns true if Button is down
-//     /// Accepts repeating
-//     pub fn button_pressed(&self, keycode: MouseButton) -> bool {
-//         self.pressed.contains(&keycode)
-//     }
-//
-//     /// Returns true if Button was pressed this frame
-//     /// Does not accept repeating
-//     pub fn button_just_pressed(&self, keycode: MouseButton) -> bool {
-//         self.pressed.contains(&keycode) && !self.previous_pressed.contains(&keycode)
-//     }
-//
-//     /// Returns true is MouseButton was released this frame
-//     pub fn button_released(&self, keycode: MouseButton) -> bool {
-//         !self.pressed.contains(&keycode) && self.previous_pressed.contains(&keycode)
-//     }
-//
-//     /// Returns the (dx, dy) change in mouse position
-//     pub fn mouse_delta(&self) -> (f64, f64) {
-//         self.delta
-//     }
-//
-//     /// Sets the (dx, dy) change in mouse position
-//     pub(crate) fn set_mouse_delta(&mut self, change: (f64, f64)) {
-//         self.delta = change;
-//     }
-//
-//     /// Sets mouse off screen
-//     pub(crate) fn set_off_screen(&mut self) {
-//         self.on_screen = false;
-//     }
-//
-//     // Sets the current position of the mouse
-//     pub(crate) fn set_pos(&mut self, pos: (f64, f64), ctx: &RenderContext) {
-//         self.pos = pos;
-//
-//         // Check if mouse is on screen
-//         // When holding mouse button CursorLeft event will not be called so need check here
-//         if pos.0 >= 0.0
-//             && pos.0 < ctx.window_size.width as f64
-//             && pos.1 >= 0.0
-//             && pos.1 < ctx.window_size.height as f64
-//         {
-//             self.on_screen = true;
-//         } else {
-//             self.on_screen = false;
-//         }
-//     }
-//
-//     /// Save current buttons in previous
-//     /// Should be called each frame
-//     pub(crate) fn save_buttons(&mut self) {
-//         self.previous_pressed = self.pressed.clone()
-//     }
-//
-//     /// Sets button for current frame
-//     pub(crate) fn set_buttons(&mut self, keycode: MouseButton) {
-//         self.pressed.insert(keycode);
-//     }
-//
-//     /// Release button
-//     pub(crate) fn release_button(&mut self, keycode: MouseButton) {
-//         self.pressed.remove(&keycode);
-//     }
-// }
-//
-// #[derive(Default)]
-// pub struct KeyboardContext {
-//     pressed: HashSet<KeyCode>,
-//     previous_pressed: HashSet<KeyCode>,
-// }
-//
-// // Getting keys
-// impl KeyboardContext {
-//     /// Returns true if KeyCode is down
-//     /// Accepts repeating
-//     pub fn key_pressed(&self, keycode: KeyCode) -> bool {
-//         self.pressed.contains(&keycode)
-//     }
-//
-//     /// Returns true if KeyCode was pressed this frame
-//     /// Does not accepts repeating
-//     pub fn key_just_pressed(&self, keycode: KeyCode) -> bool {
-//         self.pressed.contains(&keycode) && !self.previous_pressed.contains(&keycode)
-//     }
-//
-//     /// Returns true is KeyCode was released this frame
-//     pub fn key_released(&self, keycode: KeyCode) -> bool {
-//         !self.pressed.contains(&keycode) && self.previous_pressed.contains(&keycode)
-//     }
-//
-//     /// Save current keys in previous
-//     /// Should be called each frame
-//     pub(crate) fn save_keys(&mut self) {
-//         self.previous_pressed = self.pressed.clone()
-//     }
-//
-//     /// Sets key for current frame
-//     pub(crate) fn set_key(&mut self, keycode: KeyCode) {
-//         self.pressed.insert(keycode);
-//     }
-//
-//     /// Release key
-//     pub(crate) fn release_key(&mut self, keycode: KeyCode) {
-//         self.pressed.remove(&keycode);
-//     }
-// }
-//
-// #[cfg(test)]
-// mod tests {
-//     use crate::input::KeyCode;
-//     use crate::input::KeyboardContext;
-//
-//     #[test]
-//     fn key_pressed_test() {
-//         let mut kc = KeyboardContext::default();
-//
-//         kc.set_key(KeyCode::A);
-//
-//         assert!(kc.key_pressed(KeyCode::A));
-//         assert!(!kc.key_pressed(KeyCode::B));
-//
-//         kc.save_keys();
-//         kc.set_key(KeyCode::B);
-//
-//         assert!(kc.key_pressed(KeyCode::A));
-//         assert!(kc.key_pressed(KeyCode::B));
-//
-//         kc.save_keys();
-//         kc.release_key(KeyCode::A);
-//
-//         assert!(!kc.key_pressed(KeyCode::A));
-//         assert!(kc.key_pressed(KeyCode::B));
-//     }
-//
-//     #[test]
-//     fn key_just_pressed_test() {
-//         let mut kc = KeyboardContext::default();
-//         kc.set_key(KeyCode::A);
-//
-//         assert!(kc.key_just_pressed(KeyCode::A));
-//
-//         kc.save_keys();
-//         kc.set_key(KeyCode::A);
-//
-//         assert!(!kc.key_just_pressed(KeyCode::A));
-//     }
-//
-//     #[test]
-//     fn key_released_test() {
-//         let mut kc = KeyboardContext::default();
-//         kc.set_key(KeyCode::A);
-//
-//         assert!(!kc.key_released(KeyCode::A));
-//
-//         kc.save_keys();
-//         kc.release_key(KeyCode::A);
-//
-//         assert!(kc.key_released(KeyCode::A));
-//     }
-// }
