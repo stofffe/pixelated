@@ -1,6 +1,6 @@
 [package]
 name = "pixelated"
-version = "0.1.2"
+version = "0.2.0"
 edition = "2021"
 rust-version = "1.76.0"
 description = "An opinionated pixel renderer focusing on simplicity."
@@ -15,7 +15,7 @@ exclude = ["examples/", ".git/"]
 
 [dependencies]
 pollster = "0.2"
-winit = { version = "0.29.15", features = ["rwh_05", "rwh_06"] }
+winit = { version = "0.29.15", features = [] }
 wgpu = "0.19.3"
 bytemuck = { version = "1.13.1", features = ["derive"] }
 log = "0.4"

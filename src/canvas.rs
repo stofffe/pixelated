@@ -1,6 +1,6 @@
 use crate::Context;
 
-pub(crate) const DEFAULT_CLEAR_COLOR: [u8; 4] = [0, 0, 0, 255]; // Black
+pub(crate) const DEFAULT_CLEAR_COLOR: [u8; 3] = [0, 0, 0]; // Black
 pub(crate) const DEFAULT_CANVAS_WIDTH: u32 = 512;
 pub(crate) const DEFAULT_CANVAS_HEIGHT: u32 = 512;
 
@@ -9,7 +9,7 @@ pub(crate) struct Canvas {
     pub(crate) pixels: Vec<u8>,
     pub(crate) width: u32,
     pub(crate) height: u32,
-    clear_color: [u8; 4],
+    last_clear_color: [u8; 3],
 }
 
 impl Canvas {
@@ -17,12 +17,12 @@ impl Canvas {
     pub(crate) fn new(width: u32, height: u32) -> Self {
         let capacity = width * height * 4;
         let pixels = vec![0; capacity as usize];
-        let clear_color = DEFAULT_CLEAR_COLOR;
+        let last_clear_color = DEFAULT_CLEAR_COLOR;
         Self {
             pixels,
             width,
             height,
-            clear_color,
+            last_clear_color,
         }
     }
 
@@ -35,7 +35,8 @@ impl Canvas {
         self.width = width;
         self.height = height;
 
-        self.clear_screen();
+        let color = self.last_clear_color;
+        self.clear_screen(&color);
     }
 
     /// Clone pixel buffer
@@ -179,36 +180,25 @@ impl Canvas {
         self.write_pixel_blend(x, y, &color);
     }
 
-    /// Set canvas clear color (r,g,b,a)
-    pub(crate) fn set_clear_color(&mut self, color: &[u8; 3]) {
-        self.clear_color[0] = color[0];
-        self.clear_color[1] = color[1];
-        self.clear_color[2] = color[2];
-        self.clear_color[3] = 255;
+    /// Clears all pixels in canvas to clear color
+    pub(crate) fn clear_screen(&mut self, color: &[u8; 3]) {
+        for pixel in self.pixels.chunks_mut(4) {
+            pixel[0] = color[0];
+            pixel[1] = color[1];
+            pixel[2] = color[2];
+            pixel[3] = 255;
+        }
+        self.last_clear_color = *color;
     }
 
-    /// Set canvas clear color (r,g,b)
-    /// Values must lie in range [0,1]
-    pub(crate) fn set_clear_color_f32(&mut self, color: &[f32; 3]) {
-        assert_rgb(color);
-
-        let color = [
+    /// Clears all pixels in canvas to clear color
+    pub(crate) fn clear_screen_f32(&mut self, color: &[f32; 3]) {
+        let color = &[
             (color[0] * 255.0) as u8,
             (color[1] * 255.0) as u8,
             (color[2] * 255.0) as u8,
         ];
-
-        self.set_clear_color(&color);
-    }
-
-    /// Clears all pixels in canvas to clear color
-    pub(crate) fn clear_screen(&mut self) {
-        for pixel in self.pixels.chunks_mut(4) {
-            pixel[0] = self.clear_color[0];
-            pixel[1] = self.clear_color[1];
-            pixel[2] = self.clear_color[2];
-            pixel[3] = self.clear_color[3];
-        }
+        self.clear_screen(color);
     }
 }
 
@@ -350,23 +340,16 @@ pub fn resize(ctx: &mut Context, width: u32, height: u32) {
     ctx.render.resize_canvas_texture(width, height);
 }
 
-/// Set canvas clear color
-///
-/// Color: RGB \[0,255\]
-pub fn set_clear_color(ctx: &mut Context, color: &[u8; 3]) {
-    ctx.render.canvas.set_clear_color(color);
+/// Clears all pixels to clear color
+pub fn clear_screen(ctx: &mut Context, color: &[u8; 3]) {
+    ctx.render.canvas.clear_screen(color);
 }
 
-/// Set canvas clear color
+/// Clears all pixels in canvas to clear color
 ///
 /// Color: RGB \[0,1\]
-pub fn set_clear_color_f32(ctx: &mut Context, color: &[f32; 3]) {
-    ctx.render.canvas.set_clear_color_f32(color);
-}
-
-/// Clears all pixels to clear color
-pub fn clear_screen(ctx: &mut Context) {
-    ctx.render.canvas.clear_screen();
+pub fn clear_screen_f32(ctx: &mut Context, color: &[f32; 3]) {
+    ctx.render.canvas.clear_screen_f32(color);
 }
 
 /// Canvas width

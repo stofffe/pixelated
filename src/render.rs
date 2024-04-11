@@ -51,7 +51,7 @@ impl RenderContext {
                 force_fallback_adapter: false,
             })
             .await
-            .unwrap();
+            .expect("could not create adapter");
         let (device, queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
@@ -62,7 +62,7 @@ impl RenderContext {
                 None, // Trace path
             )
             .await
-            .unwrap();
+            .expect("could not create device");
 
         // Configure surface
         let surface_config =
@@ -167,12 +167,7 @@ impl RenderContext {
                     view: &view,
                     resolve_target: None,
                     ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: 0.1,
-                            g: 0.2,
-                            b: 0.3,
-                            a: 1.0,
-                        }),
+                        load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
                         store: wgpu::StoreOp::Store,
                     },
                 })],

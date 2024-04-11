@@ -11,8 +11,7 @@ impl Callbacks for Game {
     }
 
     fn update(&mut self, ctx: &mut Context) -> bool {
-        canvas::set_clear_color(ctx, &[255, 255, 255]);
-        canvas::clear_screen(ctx);
+        canvas::clear_screen(ctx, &[255, 255, 255]);
 
         // Write
         for y in 25..125 {

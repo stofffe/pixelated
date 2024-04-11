@@ -109,7 +109,7 @@ impl Callbacks for Conways {
         }
 
         // Draw
-        canvas::clear_screen(ctx);
+        canvas::clear_screen(ctx, &[0, 0, 0]);
         for y in 0..self.height {
             for x in 0..self.width {
                 if self.is_alive(x, y) {

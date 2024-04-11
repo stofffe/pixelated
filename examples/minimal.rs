@@ -12,7 +12,7 @@ impl Callbacks for Game {
     }
 
     fn update(&mut self, ctx: &mut Context) -> bool {
-        canvas::clear_screen(ctx);
+        canvas::clear_screen(ctx, &[0, 0, 0]);
 
         let (px, py) = (75, 75);
         let (wx, wy) = (100, 100);
