@@ -108,7 +108,7 @@ pub(crate) async fn run_window<C: Callbacks + 'static>(
 // Commands
 //
 
-/// Returns a reference to the window
+/// Reference to the window
 ///
 /// Window contains useful functions such as fullscreen, cursor control and resizing window
 pub fn window_ref(ctx: &mut Context) -> &winit::window::Window {

@@ -8,12 +8,14 @@ use winit::event_loop::EventLoop;
 /// Will be called from the main event loop
 pub trait Callbacks {
     /// Called before initalization
-    fn init(&self, _ctx: &mut Context) {}
+    #[allow(unused_variables)]
+    fn init(&self, ctx: &mut Context) {}
 
     /// Called once per frame before render
+    ///
     /// Return value determines wether to exit game or not
-    /// dt: Time since last frame in seconds
-    fn update(&mut self, _ctx: &mut Context) -> bool {
+    #[allow(unused_variables)]
+    fn update(&mut self, ctx: &mut Context) -> bool {
         false
     }
 }

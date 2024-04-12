@@ -113,44 +113,44 @@ impl MouseContext {
 // Mouse commands
 //
 
-/// Returns the mouse delta for the current frame
+/// Mouse delta for the current frame
 pub fn mouse_delta(ctx: &Context) -> (f32, f32) {
     let (dx, dy) = ctx.input.mouse.mouse_delta();
     (dx as f32, dy as f32)
 }
 
-/// Returns if mouse is on screen
+/// If mouse is on screen
 pub fn mouse_on_screen(ctx: &Context) -> bool {
     ctx.input.mouse.on_screen()
 }
 
-/// Returns the current physical coordinates for the mouse
+/// Current physical coordinates for the mouse
 pub fn mouse_pos_physical(ctx: &Context) -> (f64, f64) {
     ctx.input.mouse.mouse_pos_physical()
 }
 
-/// Returns the current pixel under the mouse
+/// Current pixel under the mouse
 pub fn mouse_pos_pixel(ctx: &Context) -> (u32, u32) {
     ctx.input.mouse.mouse_pos_pixel(&ctx.render)
 }
 
-/// Returns if MouseButton is pressed
+/// If MouseButton is pressed
 /// Accepts repeating
 pub fn mouse_button_pressed(ctx: &Context, keycode: MouseButton) -> bool {
     ctx.input.mouse.button_pressed(keycode)
 }
 
-/// Returns if MouseButton was pressed this frame
+/// If MouseButton was pressed this frame
 pub fn mouse_button_just_pressed(ctx: &Context, keycode: MouseButton) -> bool {
     ctx.input.mouse.button_just_pressed(keycode)
 }
 
-/// Returns if MouseButton was released this frame
+/// If MouseButton was released this frame
 pub fn mouse_button_released(ctx: &Context, keycode: MouseButton) -> bool {
     ctx.input.mouse.button_released(keycode)
 }
 
-/// Returns the scroll delta for the current frame
+/// Scroll delta for the current frame
 pub fn scroll_delta(ctx: &Context) -> (f32, f32) {
     let (dx, dy) = ctx.input.mouse.scroll_delta();
     (dx as f32, dy as f32)
@@ -252,36 +252,36 @@ impl KeyboardContext {
 // Keyboard commands
 //
 
-/// Returns if KeyCode is pressed
+/// If KeyCode is pressed
 ///
 /// Accepts repeating
 pub fn key_pressed(ctx: &Context, keycode: KeyCode) -> bool {
     ctx.input.keyboard.key_pressed(keycode)
 }
 
-/// Returns if KeyCode was pressed this frame
+/// If KeyCode was pressed this frame
 pub fn key_just_pressed(ctx: &Context, keycode: KeyCode) -> bool {
     ctx.input.keyboard.key_just_pressed(keycode)
 }
 
-/// Returns is KeyCode was released this frame
+/// If KeyCode was released this frame
 pub fn key_released(ctx: &Context, keycode: KeyCode) -> bool {
     ctx.input.keyboard.key_released(keycode)
 }
 
-/// Returns if KeyModifer is pressed
+/// If KeyModifer is pressed
 ///
 /// Accepts repeating
 pub fn modifier_pressed(ctx: &Context, key_modifier: KeyModifier) -> bool {
     ctx.input.keyboard.modifier_pressed(key_modifier)
 }
 
-/// Returns if KeyModifer was pressed this frame
+/// If KeyModifer was pressed this frame
 pub fn modifer_just_pressed(ctx: &Context, key_modifier: KeyModifier) -> bool {
     ctx.input.keyboard.modifier_just_pressed(key_modifier)
 }
 
-/// Returns if KeyModifier was released this frame
+/// If KeyModifier was released this frame
 pub fn modifer_released(ctx: &Context, key_modifier: KeyModifier) -> bool {
     ctx.input.keyboard.modifier_released(key_modifier)
 }

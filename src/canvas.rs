@@ -1,8 +1,8 @@
 use crate::Context;
 
-pub const DEFAULT_CLEAR_COLOR: [u8; 3] = [0, 0, 0]; // Black
-pub const DEFAULT_CANVAS_WIDTH: u32 = 512;
-pub const DEFAULT_CANVAS_HEIGHT: u32 = 512;
+pub(crate) const DEFAULT_CLEAR_COLOR: [u8; 3] = [0, 0, 0]; // Black
+pub(crate) const DEFAULT_CANVAS_WIDTH: u32 = 512;
+pub(crate) const DEFAULT_CANVAS_HEIGHT: u32 = 512;
 
 /// Represent the screen of pixels
 pub(crate) struct Canvas {
@@ -245,7 +245,7 @@ fn assert_rgba(color: &[f32; 4]) {
 
 // Commands
 
-/// Mutable reference to pixel array
+/// Mutable reference to pixel buffer
 ///
 /// Stored as list of u8, chunks of 4 represent RGBA
 pub fn pixels_ref(ctx: &mut Context) -> &mut Vec<u8> {
