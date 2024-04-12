@@ -8,7 +8,7 @@ struct Game {}
 impl Callbacks for Game {
     fn init(&self, ctx: &mut Context) {
         canvas::resize(ctx, WIDTH, HEIGHT);
-        window::window(ctx).set_resizable(true);
+        window::window_ref(ctx).set_resizable(true);
     }
 
     fn update(&mut self, ctx: &mut Context) -> bool {

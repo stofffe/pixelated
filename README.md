@@ -21,11 +21,11 @@ struct Game {}
 impl Callbacks for Game {
     fn init(&self, ctx: &mut Context) {
         canvas::resize(ctx, WIDTH, HEIGHT);
-        window::window(ctx).set_resizable(true);
+        window::window_ref(ctx).set_resizable(true);
     }
 
     fn update(&mut self, ctx: &mut Context) -> bool {
-        canvas::clear_screen(ctx);
+        canvas::clear_screen(ctx, &[0, 0, 0]);
 
         let (px, py) = (75, 75);
         let (wx, wy) = (100, 100);
@@ -41,7 +41,6 @@ impl Callbacks for Game {
 
 fn main() {
     let app = Game {};
-    println!("S: to screenshot");
     pixelated::run(app);
 }
 ```

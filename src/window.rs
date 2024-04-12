@@ -1,5 +1,9 @@
 #![allow(clippy::single_match, clippy::collapsible_match)]
 
+// Re-export winit
+pub use winit;
+
+// Imports
 use crate::{
     app::{App, Callbacks},
     context::Context,
@@ -107,7 +111,7 @@ pub(crate) async fn run_window<C: Callbacks + 'static>(
 /// Returns a reference to the window
 ///
 /// Window contains useful functions such as fullscreen, cursor control and resizing window
-pub fn window(ctx: &mut Context) -> &winit::window::Window {
+pub fn window_ref(ctx: &mut Context) -> &winit::window::Window {
     &ctx.render.window
 }
 
@@ -120,35 +124,3 @@ pub fn set_vsync(ctx: &mut Context, vsync: bool) {
     };
     ctx.render.reconfigure_present_mode(present_mode);
 }
-
-// /// Enable/Disable borderless windowed mode
-// pub fn set_fullscreen(ctx: &mut Context, fullscreen: bool) {
-//     let fullscreen_mode = if fullscreen {
-//         Some(winit::window::Fullscreen::Borderless(None))
-//     } else {
-//         None
-//     };
-//     ctx.render.window.set_fullscreen(fullscreen_mode);
-// }
-
-// /// Enable/Disable window resizing
-// pub fn set_resizeable(ctx: &mut Context, resizable: bool) {
-//     ctx.render.window.set_resizable(resizable);
-// }
-
-// /// Enable/Disable the cursor
-// ///
-// /// If disabled: Turns off cursor graphics and locks cursor to middle of window
-// pub fn set_cursor_enabled(ctx: &mut Context, enabled: bool) {
-//     // TODO handle error
-//     ctx.render.window.set_cursor_visible(enabled);
-//     let grab_mode = if enabled {
-//         winit::window::CursorGrabMode::None
-//     } else {
-//         winit::window::CursorGrabMode::Locked
-//     };
-//     ctx.render
-//         .window
-//         .set_cursor_grab(grab_mode)
-//         .expect("could not set cursor grab mode");
-// }

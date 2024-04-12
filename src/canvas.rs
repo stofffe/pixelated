@@ -1,8 +1,8 @@
 use crate::Context;
 
-pub(crate) const DEFAULT_CLEAR_COLOR: [u8; 3] = [0, 0, 0]; // Black
-pub(crate) const DEFAULT_CANVAS_WIDTH: u32 = 512;
-pub(crate) const DEFAULT_CANVAS_HEIGHT: u32 = 512;
+pub const DEFAULT_CLEAR_COLOR: [u8; 3] = [0, 0, 0]; // Black
+pub const DEFAULT_CANVAS_WIDTH: u32 = 512;
+pub const DEFAULT_CANVAS_HEIGHT: u32 = 512;
 
 /// Represent the screen of pixels
 pub(crate) struct Canvas {
@@ -362,7 +362,10 @@ pub fn height(ctx: &Context) -> u32 {
     ctx.render.canvas.height
 }
 
-// Tests
+///
+/// Tests
+///
+
 #[cfg(test)]
 mod tests {
     use super::Canvas;

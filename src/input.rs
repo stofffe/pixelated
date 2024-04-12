@@ -1,9 +1,10 @@
-use winit::event::Modifiers;
+// Re-exports
 pub use winit::event::MouseButton;
 pub use winit::keyboard::KeyCode;
 
 use crate::{render::RenderContext, Context};
 use std::collections::HashSet;
+use winit::event::Modifiers;
 
 #[derive(Default)]
 pub(crate) struct InputContext {
@@ -284,6 +285,10 @@ pub fn modifer_just_pressed(ctx: &Context, key_modifier: KeyModifier) -> bool {
 pub fn modifer_released(ctx: &Context, key_modifier: KeyModifier) -> bool {
     ctx.input.keyboard.modifier_released(key_modifier)
 }
+
+///
+/// Tests
+///
 
 #[cfg(test)]
 mod tests {
